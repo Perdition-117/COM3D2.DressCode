@@ -26,6 +26,8 @@ To use the same costume for all maids, simply select the Scene setting for the s
 
 If a costume has not been created for the configured setting, Default behaviour applies. Maids that have not yet been configured will use the configured scene setting.
 
+DressCode generates thumbnails prefixed `dresscode_` in the `Thumb` directory when a costume is saved. These may safely be deleted and will be regenerated the next time a costume is saved.
+
 ## Installing
 
 Get the latest version from [the release page](../../releases/latest). Extract the archive contents into the `BepInEx` directory.
