@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Localization>
+	<Language Code="en">
+		<Term Key="BackButton" Translation="Back" />
+		
+		<Term Key="SceneSetting" Translation="Scene settings" />
+		<Term Key="MaidSetting" Translation="Maid settings" />
+		
+		<Term Key="SceneDance" Translation="Dance" />
+		<Term Key="ScenePoleDance" Translation="Pole dance" />
+		<Term Key="SceneYotogi" Translation="Yotogi" />
+		
+		<Term Key="CostumeSetting" Translation="Costume setting" />
+		
+		<Term Key="DefaultLabel" Translation="Default" />
+		<Term Key="DefaultDescription" Translation="Use default costume" />
+		<Term Key="SharedLabel" Translation="Shared" />
+		<Term Key="SharedDescription" Translation="Use shared scene costume" />
+		<Term Key="PersonalLabel" Translation="Personal" />
+		<Term Key="PersonalDescription" Translation="Use personal costume" />
+		
+		<Term Key="EditButton" Translation="Edit" />
+	</Language>
+	<Language Code="ja">
+		<Term Key="SceneDance" Translation="ダンス" />
+		<Term Key="ScenePoleDance" Translation="ポールダンス" />
+		<Term Key="SceneYotogi" Translation="夜伽" />
+		
+		<Term Key="CostumeSetting" Translation="コスチューム設定" />
+		
+		<Term Key="DefaultLabel" Translation="デフォルト" />
+		
+		<Term Key="EditButton" Translation="エディット" />
+	</Language>
+	<Language Code="zh-CN">
+		<Term Key="CostumeSetting" Translation="制服设定" />
+		
+		<Term Key="DefaultLabel" Translation="默认" />
+	</Language>
+	<Language Code="zh-TW">
+		<Term Key="CostumeSetting" Translation="制服設定" />
+		
+		<Term Key="DefaultLabel" Translation="默認" />
+	</Language>
+</Localization>
