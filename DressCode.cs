@@ -59,7 +59,7 @@ public class DressCode : BaseUnityPlugin {
 	}
 
 	internal static string GetThumbnailFileName(Maid maid, CostumeScene scene) {
-		return $"dresscode_{maid?.status.guid ?? "shared"}_{scene.ToString().ToLower()}.png";
+		return $"dresscode_{maid?.status.guid ?? "scene"}_{scene.ToString().ToLower()}.png";
 	}
 
 	internal static bool TryGetMaidProfile(Maid maid, CostumeScene scene, out Configuration.SceneProfile profile) {
@@ -79,12 +79,12 @@ public class DressCode : BaseUnityPlugin {
 				costume = maidProfile.Costume;
 				return true;
 			}
-			if (maidProfile.PreferredProfile == CostumeProfile.Shared && hasSceneProfile && sceneProfile.HasCostume) {
+			if (maidProfile.PreferredProfile == CostumeProfile.Scene && hasSceneProfile && sceneProfile.HasCostume) {
 				costume = sceneProfile.Costume;
 				return true;
 			}
 		} else if (hasSceneProfile) {
-			if (sceneProfile.PreferredProfile == CostumeProfile.Shared && sceneProfile.HasCostume) {
+			if (sceneProfile.PreferredProfile == CostumeProfile.Scene && sceneProfile.HasCostume) {
 				costume = sceneProfile.Costume;
 				return true;
 			}

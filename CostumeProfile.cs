@@ -2,6 +2,6 @@
 
 public enum CostumeProfile {
 	Default,
-	Shared,
+	Scene,
 	Personal,
 }

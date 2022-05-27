@@ -113,7 +113,7 @@ public class Configuration {
 	internal void SaveCostume(Maid maid, CostumeScene scene, Costume newCostume, CostumeProfile profile) {
 		var profileConfig = profile switch {
 			CostumeProfile.Personal => GetMaidProfile(maid, scene),
-			CostumeProfile.Shared => GetSceneProfile(scene),
+			CostumeProfile.Scene => GetSceneProfile(scene),
 			_ => throw new NotImplementedException(),
 		};
 		profileConfig.Costume = newCostume;

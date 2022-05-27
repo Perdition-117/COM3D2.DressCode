@@ -40,13 +40,13 @@ internal class ProfilePanel : CanvasComponent {
 		};
 		_toggleGroup.AddButton(button1, CostumeProfile.Default);
 
-		var button2 = new ProfileRadioButton(_buttonGroup, "Shared") {
+		var button2 = new ProfileRadioButton(_buttonGroup, "Scene") {
 			Position = new(15, 25),
-			Term = "SharedLabel",
-			Description = "SharedDescription",
+			Term = "SceneLabel",
+			Description = "SceneDescription",
 		};
 		button2.EditClicked += () => CostumeEdit.StartCostumeEdit(SelectedScene);
-		_toggleGroup.AddButton(button2, CostumeProfile.Shared);
+		_toggleGroup.AddButton(button2, CostumeProfile.Scene);
 
 		var button3 = new ProfileRadioButton(_buttonGroup, "Personal") {
 			Position = new(15, -90),
@@ -85,20 +85,20 @@ internal class ProfilePanel : CanvasComponent {
 	}
 
 	public void SetSceneMode() {
-		_toggleGroup[CostumeProfile.Shared].ShowButton();
+		_toggleGroup[CostumeProfile.Scene].ShowButton();
 		_toggleGroup[CostumeProfile.Personal].SetActive(false);
 		_toggleGroup[CostumeProfile.Personal].IsOn = false;
 		_toggleGroup[CostumeProfile.Default].Position = new(15, 140 - (115 / 2));
-		_toggleGroup[CostumeProfile.Shared].Position = new(15, 25 - (115 / 2));
+		_toggleGroup[CostumeProfile.Scene].Position = new(15, 25 - (115 / 2));
 		_buttonGroup.SizeDelta = new(341, 346);
 		_buttonGroup.Position = new(-307.5001f, 242);
 	}
 
 	public void SetMaidMode() {
-		_toggleGroup[CostumeProfile.Shared].HideEditButton();
+		_toggleGroup[CostumeProfile.Scene].HideEditButton();
 		_toggleGroup[CostumeProfile.Personal].SetActive(true);
 		_toggleGroup[CostumeProfile.Default].Position = new(15, 140);
-		_toggleGroup[CostumeProfile.Shared].Position = new(15, 25);
+		_toggleGroup[CostumeProfile.Scene].Position = new(15, 25);
 		_buttonGroup.SizeDelta = new(341, 461);
 		_buttonGroup.Position = new(-307.5001f, 184.5f);
 	}
@@ -115,7 +115,7 @@ internal class ProfilePanel : CanvasComponent {
 	private void UpdateThumbnail() {
 		_thumbnailPanel.ThumbnailImage = _selectedProfile switch {
 			CostumeProfile.Default => SelectedMaid?.GetThumCard(),
-			CostumeProfile.Shared => DressCode.GetThumbnail(SelectedScene, null),
+			CostumeProfile.Scene => DressCode.GetThumbnail(SelectedScene, null),
 			CostumeProfile.Personal => DressCode.GetThumbnail(SelectedScene, SelectedMaid),
 			_ => throw new NotImplementedException(),
 		};

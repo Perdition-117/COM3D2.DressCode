@@ -69,7 +69,7 @@ internal class CostumeEdit {
 	}
 
 	internal static void StartCostumeEdit(CostumeScene scene) {
-		StartCostumeEdit(DressCode.GetHeadMaid(), scene, CostumeProfile.Shared);
+		StartCostumeEdit(DressCode.GetHeadMaid(), scene, CostumeProfile.Scene);
 	}
 
 	private static void StartCostumeEdit(Maid maid, CostumeScene scene, CostumeProfile profile) {
@@ -97,7 +97,7 @@ internal class CostumeEdit {
 		if (requestedProfile == CostumeProfile.Personal && DressCode.TryGetMaidProfile(maid, scene, out var maidProfile) && maidProfile.HasCostume) {
 			DressCode.LogDebug("Creating costume from maid profile...");
 			newCostume = CloneCostume(maidProfile.Costume);
-		} else if (requestedProfile == CostumeProfile.Shared && DressCode.TryGetSceneProfile(scene, out var sceneProfile) && sceneProfile.HasCostume) {
+		} else if (requestedProfile == CostumeProfile.Scene && DressCode.TryGetSceneProfile(scene, out var sceneProfile) && sceneProfile.HasCostume) {
 			DressCode.LogDebug("Creating costume from scene profile...");
 			newCostume = CloneCostume(sceneProfile.Costume);
 		} else {

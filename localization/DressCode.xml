@@ -14,8 +14,8 @@
 		
 		<Term Key="DefaultLabel" Translation="Default" />
 		<Term Key="DefaultDescription" Translation="Use default costume" />
-		<Term Key="SharedLabel" Translation="Shared" />
-		<Term Key="SharedDescription" Translation="Use shared scene costume" />
+		<Term Key="SceneLabel" Translation="Scene" />
+		<Term Key="SceneDescription" Translation="Use scene costume" />
 		<Term Key="PersonalLabel" Translation="Personal" />
 		<Term Key="PersonalDescription" Translation="Use personal costume" />
 		
