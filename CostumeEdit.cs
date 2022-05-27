@@ -96,17 +96,35 @@ internal class CostumeEdit {
 		Configuration.Costume newCostume;
 		if (requestedProfile == CostumeProfile.Personal && DressCode.TryGetMaidProfile(maid, scene, out var maidProfile) && maidProfile.HasCostume) {
 			DressCode.LogDebug("Creating costume from maid profile...");
-			newCostume = DressCode.CloneCostume(maidProfile.Costume);
-		} else if (DressCode.TryGetSceneProfile(scene, out var sceneProfile) && sceneProfile.HasCostume) {
+			newCostume = CloneCostume(maidProfile.Costume);
+		} else if (requestedProfile == CostumeProfile.Shared && DressCode.TryGetSceneProfile(scene, out var sceneProfile) && sceneProfile.HasCostume) {
 			DressCode.LogDebug("Creating costume from scene profile...");
-			newCostume = DressCode.CloneCostume(sceneProfile.Costume);
+			newCostume = CloneCostume(sceneProfile.Costume);
 		} else {
 			DressCode.LogDebug("Creating costume from maid props...");
-			newCostume = DressCode.CloneCostume(maid);
+			newCostume = CloneCostume(maid);
 		}
 		_enabledMpn.Clear();
 		foreach (var item in newCostume.Items) {
 			_enabledMpn[item.Slot] = item.IsEnabled;
+		}
+		return newCostume;
+	}
+
+	private static Configuration.Costume CloneCostume(Configuration.Costume costume) {
+		DressCode.LogDebug($"CloneCostume");
+		var newCostume = new Configuration.Costume();
+		foreach (var item in costume.Items) {
+			newCostume.AddItem(item.Slot, item.FileName, item.IsEnabled);
+		}
+		return newCostume;
+	}
+
+	private static Configuration.Costume CloneCostume(Maid maid) {
+		var newCostume = new Configuration.Costume();
+		foreach (var mpn in AvailableMpn) {
+			var prop = maid.GetProp(mpn);
+			newCostume.AddItem((MPN)prop.idx, prop.strFileName);
 		}
 		return newCostume;
 	}

@@ -70,40 +70,28 @@ public class DressCode : BaseUnityPlugin {
 		return _config.TryGetSceneProfile(scene, out profile);
 	}
 
-	private static Configuration.Costume GetEffectiveCostume(Maid maid, CostumeScene scene) {
-		var hasMaidProfile = _config.TryGetMaidProfile(maid, scene, out var profile);
-
-		if (hasMaidProfile && profile.PreferredProfile == CostumeProfile.Personal && profile.HasCostume) {
-			return profile.Costume;
-		}
-
+	private static bool TryGetEffectiveCostume(Maid maid, CostumeScene scene, out Configuration.Costume costume) {
+		var hasMaidProfile = _config.TryGetMaidProfile(maid, scene, out var maidProfile);
 		var hasSceneProfile = _config.TryGetSceneProfile(scene, out var sceneProfile);
-		var tryScene = !hasMaidProfile || (profile.PreferredProfile == CostumeProfile.Personal && !profile.HasCostume) || profile.PreferredProfile == CostumeProfile.Shared;
-		var hasSceneCostume = hasSceneProfile && sceneProfile.PreferredProfile == CostumeProfile.Shared && sceneProfile.HasCostume;
 
-		if ((!(hasMaidProfile && !tryScene)) && hasSceneCostume) {
-			return sceneProfile.Costume;
+		if (hasMaidProfile) {
+			if (maidProfile.PreferredProfile == CostumeProfile.Personal && maidProfile.HasCostume) {
+				costume = maidProfile.Costume;
+				return true;
+			}
+			if (maidProfile.PreferredProfile == CostumeProfile.Shared && hasSceneProfile && sceneProfile.HasCostume) {
+				costume = sceneProfile.Costume;
+				return true;
+			}
+		} else if (hasSceneProfile) {
+			if (sceneProfile.PreferredProfile == CostumeProfile.Shared && sceneProfile.HasCostume) {
+				costume = sceneProfile.Costume;
+				return true;
+			}
 		}
 
-		return CloneCostume(maid);
-	}
-
-	internal static Configuration.Costume CloneCostume(Configuration.Costume costume) {
-		LogDebug($"CloneCostume");
-		var newCostume = new Configuration.Costume();
-		foreach (var item in costume.Items) {
-			newCostume.AddItem(item.Slot, item.FileName, item.IsEnabled);
-		}
-		return newCostume;
-	}
-
-	internal static Configuration.Costume CloneCostume(Maid maid) {
-		var newCostume = new Configuration.Costume();
-		foreach (var mpn in CostumeEdit.AvailableMpn) {
-			var prop = maid.GetProp(mpn);
-			newCostume.AddItem((MPN)prop.idx, prop.strFileName);
-		}
-		return newCostume;
+		costume = null;
+		return false;
 	}
 
 	internal static CostumeProfile GetPreferredProfile(Maid maid, CostumeScene scene) {
@@ -139,11 +127,14 @@ public class DressCode : BaseUnityPlugin {
 	}
 
 	private static void SetCostume(Maid maid, CostumeScene scene) {
+		if (!TryGetEffectiveCostume(maid, scene, out var costume)) {
+			return;
+		}
+
 		LogDebug($"Setting costume for {maid.name}");
 
-		var costume = GetEffectiveCostume(maid, scene);
-		if (costume == null) return;
 		GameMain.instance.StartCoroutine(WaitMaidPropBusy(maid, () => {
+			BackupCostume(maid);
 			LoadCostume(maid, costume);
 			maid.AllProcPropSeqStart();
 		}));
@@ -235,7 +226,6 @@ public class DressCode : BaseUnityPlugin {
 		for (var i = 0; i < numMaids; i++) {
 			var maid = GameMain.Instance.CharacterMgr.GetMaid(i);
 			if (maid != null && maid.body0 && !_originalCostume.ContainsKey(maid.status.guid)) {
-				BackupCostume(maid);
 				SetCostume(maid, costumeScene);
 			}
 		}
@@ -274,7 +264,6 @@ public class DressCode : BaseUnityPlugin {
 		// secondary yotogi maids are not yet loaded on sceneLoaded, so we fix them here
 		foreach (var maid in __instance.loaded_check_maid_) {
 			if (maid != null && !_originalCostume.ContainsKey(maid.status.guid)) {
-				BackupCostume(maid);
 				SetCostume(maid, CostumeScene.Yotogi);
 			}
 		}
