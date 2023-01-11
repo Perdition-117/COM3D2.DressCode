@@ -145,7 +145,7 @@ public class DressCode : BaseUnityPlugin {
 
 		var costume = new List<MaidProp>();
 		foreach (var maidProp in maid.m_aryMaidProp) {
-			costume.Add(new() {
+			var originalMaidProp = new MaidProp {
 				idx = maidProp.idx,
 				strFileName = maidProp.strFileName,
 				nFileNameRID = maidProp.nFileNameRID,
@@ -153,7 +153,11 @@ public class DressCode : BaseUnityPlugin {
 				m_dicTBodyAttachPos = new(maidProp.m_dicTBodyAttachPos),
 				m_dicMaterialProp = new(maidProp.m_dicMaterialProp),
 				m_dicBoneLength = new(maidProp.m_dicBoneLength),
-			});
+			};
+			if (maidProp.listSubProp != null) {
+				originalMaidProp.listSubProp = new(maidProp.listSubProp);
+			}
+			costume.Add(originalMaidProp);
 		}
 		_originalCostume.Add(maid.status.guid, costume);
 	}
@@ -162,13 +166,24 @@ public class DressCode : BaseUnityPlugin {
 		LogDebug($"Restoring costume for {maid.name}");
 
 		var costume = _originalCostume[maid.status.guid];
-		foreach (var maidProp in costume) {
-			maid.SetProp((MPN)maidProp.idx, maidProp.strFileName, maidProp.nFileNameRID);
-			var newProp = maid.GetProp((MPN)maidProp.idx);
-			newProp.m_dicTBodySkinPos = maidProp.m_dicTBodySkinPos;
-			newProp.m_dicTBodyAttachPos = maidProp.m_dicTBodyAttachPos;
-			newProp.m_dicMaterialProp = maidProp.m_dicMaterialProp;
-			newProp.m_dicBoneLength = maidProp.m_dicBoneLength;
+		foreach (var originalMaidProp in costume) {
+			maid.SetProp((MPN)originalMaidProp.idx, originalMaidProp.strFileName, originalMaidProp.nFileNameRID);
+			var maidProp = maid.GetProp((MPN)originalMaidProp.idx);
+			maidProp.m_dicTBodySkinPos = originalMaidProp.m_dicTBodySkinPos;
+			maidProp.m_dicTBodyAttachPos = originalMaidProp.m_dicTBodyAttachPos;
+			maidProp.m_dicMaterialProp = originalMaidProp.m_dicMaterialProp;
+			maidProp.m_dicBoneLength = originalMaidProp.m_dicBoneLength;
+			if (originalMaidProp.listSubProp != null && originalMaidProp.listSubProp.Count > 0) {
+				maid.DelProp((MPN)originalMaidProp.idx);
+				for (int i = 0; i < originalMaidProp.listSubProp.Count; i++) {
+					var originalSubProp = originalMaidProp.listSubProp[i];
+					if (originalSubProp != null) {
+						maid.SetSubProp((MPN)originalMaidProp.idx, i, originalSubProp.strFileName, originalSubProp.nFileNameRID);
+						var subProp = maid.GetSubProp((MPN)originalMaidProp.idx, i);
+						subProp.fTexMulAlpha = originalSubProp.fTexMulAlpha;
+					}
+				}
+			}
 		}
 		_originalCostume.Remove(maid.status.guid);
 	}
