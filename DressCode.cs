@@ -113,7 +113,7 @@ public class DressCode : BaseUnityPlugin {
 	internal static void LoadCostume(Maid maid, Configuration.Costume costume, bool isEditMode = false) {
 		LogDebug("Loading costume...");
 
-		foreach (var mpn in CostumeEdit.AvailableMpn) {
+		foreach (var mpn in CostumeEdit.CostumeMpn) {
 			var hasItem = costume.TryGetItem(mpn, out var item) && item.FileName != string.Empty;
 			//Log.LogDebug($"- {mpn,-10} {item.IsEnabled,-5} {item.FileName}");
 			if (!isEditMode && hasItem && !item.IsEnabled) {

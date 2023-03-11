@@ -14,7 +14,8 @@ internal class CostumeEdit {
 
 	private static bool _isDressCode = false;
 
-	internal static readonly HashSet<MPN> AvailableMpn = new() {
+	// MPNs to be saved and loaded for costumes
+	internal static readonly HashSet<MPN> CostumeMpn = new() {
 		//MPN.hairf,
 		//MPN.hairr,
 		//MPN.hairt,
@@ -52,6 +53,13 @@ internal class CostumeEdit {
 		MPN.handitem,
 		MPN.acchat,
 	};
+
+	// additional MPNs to be enabled in edit mode
+	internal static readonly HashSet<MPN> EnabledMpn = new(CostumeMpn.Concat(new[] {
+		MPN.set_maidwear,
+		MPN.set_mywear,
+		MPN.set_underwear,
+	}));
 
 	private static readonly Dictionary<DailyMgr.Daily, string> DayTimeLabels = new() {
 		[DailyMgr.Daily.Daytime] = "*昼メニュー",
@@ -122,7 +130,7 @@ internal class CostumeEdit {
 
 	private static Configuration.Costume CloneCostume(Maid maid) {
 		var newCostume = new Configuration.Costume();
-		foreach (var mpn in AvailableMpn) {
+		foreach (var mpn in CostumeMpn) {
 			var prop = maid.GetProp(mpn);
 			newCostume.AddItem((MPN)prop.idx, prop.strFileName);
 		}
@@ -133,7 +141,7 @@ internal class CostumeEdit {
 		var newCostume = new Configuration.Costume();
 
 		DressCode.LogDebug("Saving costume...");
-		foreach (var mpn in AvailableMpn) {
+		foreach (var mpn in CostumeMpn) {
 			var prop = maid.GetProp(mpn);
 			var isEnabled = !_enabledMpn.TryGetValue(mpn, out var isForcedExplicit) || isForcedExplicit;
 			if (prop.strTempFileName == string.Empty || (IsDeleteItem(mpn, prop.strTempFileName) && isEnabled)) {
@@ -145,7 +153,7 @@ internal class CostumeEdit {
 
 		ConfigurationManager.Configuration.SaveCostume(maid, scene, newCostume, _currentProfile);
 
-		foreach (var mpn in AvailableMpn) {
+		foreach (var mpn in CostumeMpn) {
 			maid.ResetProp(mpn, true);
 		}
 		maid.AllProcPropSeqStart();
@@ -184,7 +192,7 @@ internal class CostumeEdit {
 		__instance.modeType = SceneEdit.ModeType.CostumeEdit;
 		__instance.m_cameraMoveSupport = __instance.gameObject.AddComponent<WfCameraMoveSupport>();
 		__instance.editItemTextureCache = __instance.gameObject.AddComponent<EditItemTextureCache>();
-		__instance.enabledMpns = AvailableMpn;
+		__instance.enabledMpns = EnabledMpn;
 
 		if (tagBackup != null && tagBackup.TryGetValue("name", out var sceneName) && sceneName == "SceneEdit") {
 			if (tagBackup.TryGetValue("label", out var strScriptArg)) {
@@ -285,16 +293,6 @@ internal class CostumeEdit {
 		foreach (var category in enabledCategories) {
 			__instance.CategoryList.Find(c => c.m_eCategory == category).m_isEnabled = true;
 		}
-
-		var enabledSetMpns = new MPN[] {
-			MPN.set_maidwear,
-			MPN.set_mywear,
-			MPN.set_underwear,
-		};
-		var w = __instance.CategoryList.Find(c => c.m_eCategory == SceneEditInfo.EMenuCategory.セット).m_listPartsType;
-		foreach (var mpn in enabledSetMpns) {
-			w.Find(c => c.m_mpn == mpn).m_isEnabled = true;
-		}
 	}
 
 	//[HarmonyPatch(typeof(Maid), "SetHairLengthSaveToMP")]
@@ -322,7 +320,7 @@ internal class CostumeEdit {
 		if (!_isDressCode) return true;
 
 		__state = f_prest.listMprop;
-		f_prest.listMprop = f_prest.listMprop.Where(e => AvailableMpn.Contains((MPN)e.idx)).ToList();
+		f_prest.listMprop = f_prest.listMprop.Where(e => CostumeMpn.Contains((MPN)e.idx)).ToList();
 
 		foreach (var maidProp in f_prest.listMprop) {
 			var mpn = (MPN)maidProp.idx;

@@ -10,12 +10,12 @@ internal class SceneList : ScrollViewPanel {
 	private readonly UIWFTabPanel _tabPanel;
 	private readonly Dictionary<CostumeScene, UIWFTabButton> _tabButtons = new();
 
-	private readonly CostumeScene[] _npcScenes = new CostumeScene[] {
+	private readonly CostumeScene[] _npcScenes = {
 		CostumeScene.Dance,
 		CostumeScene.PoleDance,
 	};
 
-	private readonly KeyValuePair<string, CostumeScene>[] _scenes = new KeyValuePair<string, CostumeScene>[] {
+	private readonly KeyValuePair<string, CostumeScene>[] _scenes = {
 		new("SceneDance", CostumeScene.Dance),
 		new("ScenePoleDance", CostumeScene.PoleDance),
 		new("SceneYotogi", CostumeScene.Yotogi),

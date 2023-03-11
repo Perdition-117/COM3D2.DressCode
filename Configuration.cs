@@ -13,7 +13,7 @@ public class Configuration {
 		public List<SceneProfile> SceneProfiles { get; set; } = new();
 
 		public SceneProfile AddSceneProfile(CostumeScene scene, CostumeProfile profile) {
-			var costume = new SceneProfile() {
+			var costume = new SceneProfile {
 				Scene = scene,
 				PreferredProfile = profile,
 			};
