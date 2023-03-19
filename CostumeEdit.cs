@@ -354,6 +354,27 @@ internal class CostumeEdit {
 		f_prest.listMprop = __state;
 	}
 
+	// save the temporary instead of the permanent items in the preset
+	[HarmonyPatch(typeof(MaidProp), nameof(MaidProp.Serialize))]
+	[HarmonyPrefix]
+	private static void MaidProp_PreSerialize(ref MaidProp __state, MaidProp __instance) {
+		if (!_isDressCode || !CostumeMpn.Contains((MPN)__instance.idx)) return;
+		__state = new() {
+			strFileName = __instance.strFileName,
+			nFileNameRID = __instance.nFileNameRID,
+		};
+		__instance.strFileName = __instance.strTempFileName;
+		__instance.nFileNameRID = __instance.nTempFileNameRID;
+	}
+
+	[HarmonyPatch(typeof(MaidProp), nameof(MaidProp.Serialize))]
+	[HarmonyPostfix]
+	private static void MaidProp_PostSerialize(MaidProp __state, MaidProp __instance) {
+		if (!_isDressCode || !CostumeMpn.Contains((MPN)__instance.idx)) return;
+		__instance.strFileName = __state.strFileName;
+		__instance.nFileNameRID = __state.nFileNameRID;
+	}
+
 	[HarmonyPatch(typeof(CostumePartsEnabledCtrl), nameof(CostumePartsEnabledCtrl.LoadMaidPropData))]
 	[HarmonyPrefix]
 	private static bool LoadMaidPropData(CostumePartsEnabledCtrl __instance) {
