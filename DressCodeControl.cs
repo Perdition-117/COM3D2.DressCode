@@ -76,7 +76,7 @@ internal class DressCodeControl : MonoBehaviour {
 	private void SelectMaid(Maid maid) {
 		_selectedMaid = maid;
 		_profilePanel.SelectedMaid = maid;
-		_sceneList.SetNpcMode(_selectedScope == ProfileScope.Maid && maid.status.heroineType != MaidStatus.HeroineType.Original);
+		_sceneList.SetNpcMode(_selectedScope == ProfileScope.Maid && maid.status.heroineType is not (MaidStatus.HeroineType.Original or MaidStatus.HeroineType.Transfer));
 		_sceneList.SelectFirstAvailable();
 		UpdateProfile();
 	}
