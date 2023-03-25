@@ -138,9 +138,13 @@ internal class CostumeEdit {
 	}
 
 	private static void SaveCostume(Maid maid, CostumeScene scene) {
+		if (scene == CostumeScene.None) {
+			throw new("Invalid CostumeScene");
+		}
+
 		var newCostume = new Configuration.Costume();
 
-		DressCode.LogDebug("Saving costume...");
+		DressCode.LogDebug($"Saving {scene} costume...");
 		foreach (var mpn in CostumeMpn) {
 			var prop = maid.GetProp(mpn);
 			var isEnabled = !_enabledMpn.TryGetValue(mpn, out var isForcedExplicit) || isForcedExplicit;
