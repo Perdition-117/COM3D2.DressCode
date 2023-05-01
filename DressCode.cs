@@ -221,17 +221,22 @@ public class DressCode : BaseUnityPlugin {
 		yield break;
 	}
 
-	private static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+	private static CostumeScene GetCostumeScene(string sceneName) {
 		var costumeScene = CostumeScene.None;
-		if (scene.name == "SceneYotogi") {
+		if (sceneName == "SceneYotogi") {
 			costumeScene = CostumeScene.Yotogi;
-		} else if (scene.name.StartsWith("SceneDance") && DanceMain.SelectDanceData != null) {
+		} else if (sceneName.StartsWith("SceneDance") && DanceMain.SelectDanceData != null) {
 			if (DanceMain.SelectDanceData.RhythmGameCorrespond) {
 				costumeScene = CostumeScene.Dance;
 			} else {
 				costumeScene = CostumeScene.PoleDance;
 			}
 		}
+		return costumeScene;
+		}
+
+	private static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+		var costumeScene = GetCostumeScene(scene.name);
 
 		_currentScene = costumeScene;
 
@@ -247,6 +252,13 @@ public class DressCode : BaseUnityPlugin {
 	}
 
 	private static void OnSceneUnloaded(Scene scene) {
+		// do not load costumes when entering or leaving edit mode while in a dress code scene
+		if (GameMain.Instance.GetNowSceneName() == "SceneEdit" && CostumeEdit.KeepCostume) return;
+		if (scene.name == "SceneEdit" && CostumeEdit.KeepCostume) {
+			CostumeEdit.KeepCostume = false;
+			return;
+		}
+
 		var numMaids = GameMain.Instance.CharacterMgr.GetMaidCount();
 		for (var i = 0; i < numMaids; i++) {
 			var maid = GameMain.Instance.CharacterMgr.GetMaid(i);

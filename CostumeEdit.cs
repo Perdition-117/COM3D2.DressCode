@@ -66,6 +66,8 @@ internal class CostumeEdit {
 		[DailyMgr.Daily.Night] = "*夜メニュー",
 	};
 
+	internal static bool KeepCostume { get; set; } = false;
+
 	public static bool TryParse<TEnum>(string value, out TEnum result) where TEnum : struct, IConvertible {
 		var retValue = value != null && Enum.IsDefined(typeof(TEnum), value);
 		result = retValue ? (TEnum)Enum.Parse(typeof(TEnum), value) : default;
@@ -86,18 +88,22 @@ internal class CostumeEdit {
 			maid.Visible = true;
 			maid.AllProcPropSeqStart();
 			GameMain.instance.StartCoroutine(DressCode.WaitMaidPropBusy(maid, () => {
-				_currentScene = scene;
-				DressCode.LogDebug($"Starting scene edit for {scene} ({profile})...");
-				var costume = CreateCostume(maid, scene, profile);
-				DressCode.LoadCostume(maid, costume, true);
-				maid.AllProcPropSeqStart();
-				GameMain.instance.StartCoroutine(DressCode.WaitMaidPropBusy(maid, () => {
-					var scriptMgr = GameMain.Instance.ScriptMgr;
-					scriptMgr.adv_kag.kag.LoadScenarioString($"@SceneCall name=SceneEdit {DressCode.ScriptTag}={profile} label={DayTimeLabels[_currentDayTime]}");
-					scriptMgr.adv_kag.kag.Exec();
-				}));
+				StartCostumeEdit(maid, scene, profile, DayTimeLabels[_currentDayTime]);
 			}));
 		});
+	}
+
+	private static void StartCostumeEdit(Maid maid, CostumeScene scene, CostumeProfile profile, string label) {
+		_currentScene = scene;
+		DressCode.LogDebug($"Starting scene edit for {scene} ({profile})...");
+		var costume = CreateCostume(maid, scene, profile);
+		DressCode.LoadCostume(maid, costume, true);
+		maid.AllProcPropSeqStart();
+		GameMain.instance.StartCoroutine(DressCode.WaitMaidPropBusy(maid, () => {
+			var scriptMgr = GameMain.Instance.ScriptMgr;
+			scriptMgr.adv_kag.kag.LoadScenarioString($"@SceneCall name=SceneEdit {DressCode.ScriptTag}={profile} label={label}");
+			scriptMgr.adv_kag.kag.Exec();
+		}));
 	}
 
 	private static Configuration.Costume CreateCostume(Maid maid, CostumeScene scene, CostumeProfile requestedProfile) {
@@ -275,6 +281,22 @@ internal class CostumeEdit {
 		sceneEdit.maid.body0.trsLookTarget = null;
 		GameMain.Instance.MainCamera.FadeOut(1f, false, sceneEdit.CreateKasizukiThumShot);
 		yield break;
+	}
+
+	// load yotogi costume when launching edit mode from scheduled yotogi
+	[HarmonyPatch(typeof(YotogiSkillSelectManager), nameof(YotogiSkillSelectManager.OnClickEdit))]
+	[HarmonyPrefix]
+	private static bool YotogiSkillSelectManager_OnClickEdit(YotogiSkillSelectManager __instance) {
+		_currentScript = "YotogiMain.ks";
+		var maid = __instance.maid_;
+		var scene = CostumeScene.Yotogi;
+		var profile = DressCode.GetPreferredProfile(maid, scene);
+		GameMain.Instance.MainCamera.FadeOut(0.5f, false, () => {
+			KeepCostume = true;
+			StartCostumeEdit(maid, scene, profile, "*edeit_end");
+		});
+
+		return false;
 	}
 
 	// enable preset save buttons
