@@ -5,4 +5,5 @@ public enum CostumeScene {
 	Dance,
 	PoleDance,
 	Yotogi,
+	PrivateMode,
 }

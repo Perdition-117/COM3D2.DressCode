@@ -19,6 +19,7 @@ internal class SceneList : ScrollViewPanel {
 		new("SceneDance", CostumeScene.Dance),
 		new("ScenePoleDance", CostumeScene.PoleDance),
 		new("SceneYotogi", CostumeScene.Yotogi),
+		new("ScenePrivateMode", CostumeScene.PrivateMode),
 	};
 
 	public SceneList(BaseComponent parent) : base(parent, nameof(SceneList)) {

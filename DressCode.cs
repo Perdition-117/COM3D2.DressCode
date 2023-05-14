@@ -6,6 +6,7 @@ using com.workman.cm3d2.scene.dailyEtc;
 using COM3D2.I2PluginLocalization;
 using HarmonyLib;
 using I2.Loc;
+using PrivateMaidMode;
 using UnityEngine.SceneManagement;
 
 namespace COM3D2.DressCode;
@@ -20,7 +21,7 @@ namespace COM3D2.DressCode;
 
 [BepInPlugin("net.perdition.com3d2.dresscode", PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 [BepInDependency("net.perdition.com3d2.editbodyloadfix", BepInDependency.DependencyFlags.SoftDependency)]
-public class DressCode : BaseUnityPlugin {
+public partial class DressCode : BaseUnityPlugin {
 	internal const string ScriptTag = "dresscode";
 
 	private static ManualLogSource _logger;
@@ -28,7 +29,16 @@ public class DressCode : BaseUnityPlugin {
 
 	private static readonly PluginLocalization _localization = new(PluginInfo.PLUGIN_NAME);
 	private static readonly Dictionary<string, List<MaidProp>> _originalCostume = new();
-	private static CostumeScene _currentScene;
+	private static readonly Dictionary<string, Configuration.Costume> _temporaryCostume = new();
+	private static CostumeScene _activeCostumeScene;
+
+	private static readonly CostumeScene[] TemporaryCostumeScenes = {
+		CostumeScene.PrivateMode,
+	};
+
+	private static readonly CostumeScene[] PersistentCostumeScenes = {
+		CostumeScene.PrivateMode,
+	};
 
 	private void Awake() {
 		SceneManager.sceneLoaded += OnSceneLoaded;
@@ -70,7 +80,7 @@ public class DressCode : BaseUnityPlugin {
 		return _config.TryGetSceneProfile(scene, out profile);
 	}
 
-	private static bool TryGetEffectiveCostume(Maid maid, CostumeScene scene, out Configuration.Costume costume) {
+	internal static bool TryGetEffectiveCostume(Maid maid, CostumeScene scene, out Configuration.Costume costume) {
 		var hasMaidProfile = _config.TryGetMaidProfile(maid, scene, out var maidProfile);
 		var hasSceneProfile = _config.TryGetSceneProfile(scene, out var sceneProfile);
 
@@ -110,8 +120,8 @@ public class DressCode : BaseUnityPlugin {
 		}
 	}
 
-	internal static void LoadCostume(Maid maid, Configuration.Costume costume, bool isEditMode = false) {
-		LogDebug("Loading costume...");
+	internal static void LoadCostume(Maid maid, Configuration.Costume costume, bool isEditMode = false, bool isTemporary = false) {
+		LogDebug($"Loading {(isTemporary ? "temporary " : "")}costume for {maid.name}...");
 
 		foreach (var mpn in CostumeEdit.CostumeMpn) {
 			var hasItem = costume.TryGetItem(mpn, out var item) && item.FileName != string.Empty;
@@ -119,29 +129,39 @@ public class DressCode : BaseUnityPlugin {
 			if (!isEditMode && hasItem && !item.IsEnabled) {
 				maid.ResetProp(mpn);
 			} else if (hasItem) {
-				maid.SetProp(mpn, item.FileName, 0, isEditMode);
+				maid.SetProp(mpn, item.FileName, 0, isEditMode || isTemporary);
 			} else {
-				maid.DelProp(mpn, isEditMode);
+				maid.DelProp(mpn, isEditMode || isTemporary);
 			}
 		}
 	}
 
-	private static void SetCostume(Maid maid, CostumeScene scene) {
+	private static void SetCostume(Maid maid, CostumeScene scene, bool isTemporary = false) {
+		if (!isTemporary && _originalCostume.ContainsKey(maid.status.guid)) {
+			return;
+		}
+
 		if (!TryGetEffectiveCostume(maid, scene, out var costume)) {
 			return;
 		}
 
-		LogDebug($"Setting costume for {maid.name}");
-
 		GameMain.instance.StartCoroutine(WaitMaidPropBusy(maid, () => {
-			BackupCostume(maid);
-			LoadCostume(maid, costume);
+			if (isTemporary) {
+				SetTemporaryCostume(maid, costume);
+			} else {
+				BackupCostume(maid);
+			}
+			LoadCostume(maid, costume, false, isTemporary);
 			maid.AllProcPropSeqStart();
 		}));
 	}
 
+	internal static void SetTemporaryCostume(Maid maid, Configuration.Costume costume) {
+		_temporaryCostume.Add(maid.status.guid, costume);
+	}
+
 	private static void BackupCostume(Maid maid) {
-		LogDebug($"Backing up costume for {maid.name}");
+		LogDebug($"Backing up costume for {maid.name}...");
 
 		var costume = new List<MaidProp>();
 		foreach (var maidProp in maid.m_aryMaidProp) {
@@ -162,8 +182,17 @@ public class DressCode : BaseUnityPlugin {
 		_originalCostume.Add(maid.status.guid, costume);
 	}
 
+	internal static void ResetCostume(Maid maid) {
+		if (_originalCostume.ContainsKey(maid.status.guid)) {
+			RestoreCostume(maid);
+		}
+		if (_temporaryCostume.ContainsKey(maid.status.guid)) {
+			RemoveTemporaryCostume(maid);
+		}
+	}
+
 	private static void RestoreCostume(Maid maid) {
-		LogDebug($"Restoring costume for {maid.name}");
+		LogDebug($"Restoring costume for {maid.name}...");
 
 		var costume = _originalCostume[maid.status.guid];
 		foreach (var originalMaidProp in costume) {
@@ -186,6 +215,16 @@ public class DressCode : BaseUnityPlugin {
 			}
 		}
 		_originalCostume.Remove(maid.status.guid);
+	}
+
+	private static void RemoveTemporaryCostume(Maid maid) {
+		LogDebug($"Removing temporary costume for {maid.name}...");
+
+		foreach (var mpn in CostumeEdit.CostumeMpn) {
+			var prop = maid.GetProp(mpn);
+			maid.ResetProp(prop);
+		}
+		_temporaryCostume.Remove(maid.status.guid);
 	}
 
 	internal static Maid GetHeadMaid() {
@@ -225,6 +264,8 @@ public class DressCode : BaseUnityPlugin {
 		var costumeScene = CostumeScene.None;
 		if (sceneName == "SceneYotogi") {
 			costumeScene = CostumeScene.Yotogi;
+		} else if (sceneName == "ScenePrivate" || sceneName == "ScenePrivateEventMode") {
+			costumeScene = CostumeScene.PrivateMode;
 		} else if (sceneName.StartsWith("SceneDance") && DanceMain.SelectDanceData != null) {
 			if (DanceMain.SelectDanceData.RhythmGameCorrespond) {
 				costumeScene = CostumeScene.Dance;
@@ -233,40 +274,75 @@ public class DressCode : BaseUnityPlugin {
 			}
 		}
 		return costumeScene;
-		}
+	}
 
 	private static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
 		var costumeScene = GetCostumeScene(scene.name);
 
-		_currentScene = costumeScene;
+		// reload private mode costume between private mode events
+		if (scene.name == "ScenePrivateEventMode" && _activeCostumeScene == CostumeScene.PrivateMode) {
+			var maid = PrivateModeMgr.Instance.PrivateMaid;
+			if (TryGetEffectiveCostume(maid, CostumeScene.PrivateMode, out var costume)) {
+				LogDebug("Reloading private mode costume...");
+				_isReloadingCostume = true;
+				LoadCostume(maid, costume, false, true);
+				_isReloadingCostume = false;
+			}
+			return;
+		}
+
+		// keep certain costumes during SceneADV scenes
+		if (scene.name == "SceneADV" && PersistentCostumeScenes.Contains(_activeCostumeScene)) {
+			return;
+		}
+		
+		if (costumeScene != _activeCostumeScene) {
+			_activeCostumeScene = costumeScene;
+			if (PersistentCostumeScenes.Contains(_activeCostumeScene)) {
+				LogDebug($"{_activeCostumeScene} scene started.");
+			}
+		}
 
 		if (costumeScene == CostumeScene.None) return;
 
 		var numMaids = GameMain.Instance.CharacterMgr.GetMaidCount();
 		for (var i = 0; i < numMaids; i++) {
 			var maid = GameMain.Instance.CharacterMgr.GetMaid(i);
-			if (maid != null && maid.body0 && !_originalCostume.ContainsKey(maid.status.guid)) {
-				SetCostume(maid, costumeScene);
+			if (maid != null && maid.body0) {
+				SetCostume(maid, costumeScene, TemporaryCostumeScenes.Contains(costumeScene));
 			}
 		}
 	}
 
 	private static void OnSceneUnloaded(Scene scene) {
+		var nextScene = GameMain.Instance.GetNowSceneName();
+
 		// do not load costumes when entering or leaving edit mode while in a dress code scene
-		if (GameMain.Instance.GetNowSceneName() == "SceneEdit" && CostumeEdit.KeepCostume) return;
+		if (nextScene == "SceneEdit" && (CostumeEdit.KeepCostume || PrivateModeMgr.Instance.PrivateMaid)) return;
 		if (scene.name == "SceneEdit" && CostumeEdit.KeepCostume) {
 			CostumeEdit.KeepCostume = false;
 			return;
 		}
 
+		// end persistent scene if not loading the scene itself or SceneADV
+		var costumeScene = GetCostumeScene(nextScene);
+		if (nextScene != "SceneADV" && costumeScene != _activeCostumeScene && PersistentCostumeScenes.Contains(_activeCostumeScene)) {
+			LogDebug($"{_activeCostumeScene} scene ended.");
+			_activeCostumeScene = CostumeScene.None;
+		}
+
+		// do not reset any costumes if a scene is still active
+		if (_activeCostumeScene != CostumeScene.None) return;
+
 		var numMaids = GameMain.Instance.CharacterMgr.GetMaidCount();
 		for (var i = 0; i < numMaids; i++) {
 			var maid = GameMain.Instance.CharacterMgr.GetMaid(i);
-			if (maid != null && maid.body0 && _originalCostume.ContainsKey(maid.status.guid)) {
-				RestoreCostume(maid);
+			if (maid != null && maid.body0) {
+				ResetCostume(maid);
 			}
 		}
 		_originalCostume.Clear();
+		_temporaryCostume.Clear();
 	}
 
 	[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.Deactivate))]
@@ -276,23 +352,36 @@ public class DressCode : BaseUnityPlugin {
 			return;
 		}
 		var maid = __instance.m_gcActiveMaid[f_nActiveSlotNo];
-		if (maid != null && _originalCostume.ContainsKey(maid.status.guid)) {
-			RestoreCostume(maid);
+		if (maid != null) {
+			ResetCostume(maid);
 		}
 	}
 
 	[HarmonyPatch(typeof(YotogiSubCharacterSelectManager), nameof(YotogiSubCharacterSelectManager.OnFinish))]
 	[HarmonyPostfix]
 	private static void YotogiSubCharacterSelectManager_OnFinish(YotogiSubCharacterSelectManager __instance) {
-		if (_currentScene != CostumeScene.Yotogi) {
+		if (_activeCostumeScene != CostumeScene.Yotogi) {
 			return;
 		}
 
 		// secondary yotogi maids are not yet loaded on sceneLoaded, so we fix them here
 		foreach (var maid in __instance.loaded_check_maid_) {
-			if (maid != null && !_originalCostume.ContainsKey(maid.status.guid)) {
+			if (maid != null) {
 				SetCostume(maid, CostumeScene.Yotogi);
 			}
+		}
+	}
+
+	[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.SetActiveMaid))]
+	[HarmonyPostfix]
+	private static void CharacterMgr_SetActiveMaid(Maid f_maid) {
+		if (_isLoadingPrivateModeMaid && !_temporaryCostume.ContainsKey(f_maid.status.guid)) {
+			foreach (var mpn in CostumeEdit.CostumeMpn) {
+				var prop = f_maid.GetProp(mpn);
+				f_maid.ResetProp(prop);
+			}
+			f_maid.Visible = true;
+			SetCostume(f_maid, CostumeScene.PrivateMode, true);
 		}
 	}
 
@@ -327,6 +416,10 @@ public class DressCode : BaseUnityPlugin {
 		value.GetComponent<UILabel>().text = "DressCode";
 		EventDelegate.Add(button.GetComponent<UIButton>().onClick, () => {
 			GameMain.Instance.MainCamera.FadeOut(0.5f, false, () => {
+				var maid = PrivateModeMgr.Instance.PrivateMaid;
+				if (maid != null) {
+					maid.Visible = false;
+				}
 				__instance.m_goPanel.gameObject.SetActive(false);
 				var manager = __instance.m_mgr.GetManager<DressCodeManager>();
 				manager.SetBackground();

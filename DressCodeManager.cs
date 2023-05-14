@@ -1,4 +1,5 @@
 ﻿using com.workman.cm3d2.scene.dailyEtc;
+using PrivateMaidMode;
 
 namespace COM3D2.DressCode;
 
@@ -50,6 +51,13 @@ public class DressCodeManager : BaseCreatePanel {
 			GameMain.Instance.MainCamera.SetAroundAngle(new(245.5691f, 6.273283f));
 		}
 		//GameMain.Instance.MainCamera.SetTargetOffset(Vector3.zero, false);
-		GameMain.Instance.BgMgr.ChangeBg(GameMain.Instance.CharacterMgr.status.isDaytime ? DailyAPI.dayBg : DailyAPI.nightBg);
+		if (PrivateModeMgr.Instance.PrivateMaid != null) {
+			PrivateModeMgr.Instance.SelectBG.Apply(GameMain.Instance.CharacterMgr.status.isDaytime);
+			GameMain.Instance.ScriptMgr.is_motion_blend = false;
+			PrivateModeMgr.Instance.SelectLocation.LoadScript();
+			GameMain.Instance.ScriptMgr.is_motion_blend = true;
+		} else {
+			GameMain.Instance.BgMgr.ChangeBg(GameMain.Instance.CharacterMgr.status.isDaytime ? DailyAPI.dayBg : DailyAPI.nightBg);
+		}
 	}
 }

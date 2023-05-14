@@ -1,4 +1,6 @@
-﻿namespace COM3D2.DressCode;
+﻿using PrivateMaidMode;
+
+namespace COM3D2.DressCode;
 
 internal class DressCodeControl : MonoBehaviour {
 	private ScopeSelectTabBar _scopeSelectTabBar;
@@ -46,6 +48,10 @@ internal class DressCodeControl : MonoBehaviour {
 				var dailyManager = manager.GetManager<DailyMgr>();
 				dailyManager.m_goPanel.SetActive(true);
 
+				var maid = PrivateModeMgr.Instance.PrivateMaid;
+				if (maid != null) {
+					maid.Visible = true;
+				}
 				manager.ResetBackground();
 				GameMain.Instance.MainCamera.FadeIn();
 			});
@@ -113,10 +119,24 @@ internal class DressCodeControl : MonoBehaviour {
 	}
 
 	private void OnProfileChanged(object sender, ProfilePanel.ProfileSelectedEventArgs e) {
+		var privateMaid = PrivateModeMgr.Instance.PrivateMaid;
+		CostumeProfile? currentProfile = privateMaid != null ? DressCode.GetPreferredProfile(privateMaid, _selectedScene) : null;
 		if (_selectedScope == ProfileScope.Scene) {
 			ConfigurationManager.Configuration.SetPreferredProfile(_selectedScene, e.Profile);
 		} else {
 			ConfigurationManager.Configuration.SetPreferredProfile(_selectedMaid, _selectedScene, e.Profile);
+		}
+		// update private maid costume immediately if necessary
+		if (_selectedScene == CostumeScene.PrivateMode && privateMaid != null) {
+			var newProfile = DressCode.GetPreferredProfile(privateMaid, _selectedScene);
+			if (currentProfile != newProfile) {
+				if (DressCode.TryGetEffectiveCostume(privateMaid, CostumeScene.PrivateMode, out var costume)) {
+					DressCode.LoadCostume(privateMaid, costume, false, true);
+					DressCode.SetTemporaryCostume(privateMaid, costume);
+				} else {
+					DressCode.ResetCostume(privateMaid);
+				}
+			}
 		}
 	}
 }

@@ -5,6 +5,7 @@ Automatically switches costume per scene. Currently supports the following scene
 - Dance
 - Pole dance
 - Yotogi
+- Private mode
 
 ![interface](https://user-images.githubusercontent.com/87424475/170797407-5be8ebc9-f898-4672-a04a-0507af3fbe50.png)
 
