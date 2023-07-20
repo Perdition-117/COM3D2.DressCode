@@ -8,11 +8,11 @@ public partial class DressCode {
 	private static bool _isLoadingPrivateModeMaid = false;
 	private static bool _isReloadingCostume = false;
 
-	// do not reset items during or between private mode events
+	// do not reset items during or between private mode or honeymoon events
 	[HarmonyPatch(typeof(Maid), nameof(Maid.ResetProp), typeof(MaidProp), typeof(bool))]
 	[HarmonyPrefix]
 	private static bool Maid_ResetProp(Maid __instance) {
-		return !(_activeCostumeScene == CostumeScene.PrivateMode && !_isReloadingCostume && _temporaryCostume.ContainsKey(__instance.status.guid));
+		return !((_activeCostumeScene == CostumeScene.PrivateMode || _activeCostumeScene == CostumeScene.Honeymoon) && !_isReloadingCostume && _temporaryCostume.ContainsKey(__instance.status.guid));
 	}
 
 	// loading private maid in office scene

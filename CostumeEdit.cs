@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using com.workman.cm3d2.scene.dailyEtc;
 using HarmonyLib;
+using Honeymoon;
 
 namespace COM3D2.DressCode;
 
@@ -294,6 +295,22 @@ internal class CostumeEdit {
 		GameMain.Instance.MainCamera.FadeOut(0.5f, false, () => {
 			KeepCostume = true;
 			StartCostumeEdit(maid, scene, profile, "*edeit_end");
+		});
+
+		return false;
+	}
+
+	// load honeymoon costume when launching edit mode from honeymoon
+	[HarmonyPatch(typeof(SceneHoneymoonModeMain), nameof(SceneHoneymoonModeMain.OnClickMaidEdit))]
+	[HarmonyPrefix]
+	private static bool SceneHoneymoonModeMain_OnClickMaidEdit(SceneHoneymoonModeMain __instance) {
+		_currentScript = "HoneymoonModeMain.ks";
+		var maid = __instance.manager.targetMaid;
+		var scene = CostumeScene.Honeymoon;
+		var profile = DressCode.GetPreferredProfile(maid, scene);
+		GameMain.Instance.MainCamera.FadeOut(0.5f, false, () => {
+			KeepCostume = true;
+			StartCostumeEdit(maid, scene, profile, "*メイン画面");
 		});
 
 		return false;

@@ -10,6 +10,7 @@
 		<Term Key="ScenePoleDance" Translation="Pole dance" />
 		<Term Key="SceneYotogi" Translation="Yotogi" />
 		<Term Key="ScenePrivateMode" Translation="Private mode" />
+		<Term Key="SceneHoneymoon" Translation="Honeymoon" />
 		
 		<Term Key="CostumeSetting" Translation="Costume setting" />
 		
@@ -27,6 +28,7 @@
 		<Term Key="ScenePoleDance" Translation="ポールダンス" />
 		<Term Key="SceneYotogi" Translation="夜伽" />
 		<Term Key="ScenePrivateMode" Translation="プライベートモード" />
+		<Term Key="SceneHoneymoon" Translation="ハネムーン" />
 		
 		<Term Key="CostumeSetting" Translation="コスチューム設定" />
 		
