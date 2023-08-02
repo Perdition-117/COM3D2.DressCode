@@ -288,10 +288,13 @@ internal class CostumeEdit {
 	[HarmonyPatch(typeof(YotogiSkillSelectManager), nameof(YotogiSkillSelectManager.OnClickEdit))]
 	[HarmonyPrefix]
 	private static bool YotogiSkillSelectManager_OnClickEdit(YotogiSkillSelectManager __instance) {
-		_currentScript = "YotogiMain.ks";
 		var maid = __instance.maid_;
 		var scene = CostumeScene.Yotogi;
 		var profile = DressCode.GetPreferredProfile(maid, scene);
+		if (profile == CostumeProfile.Default) {
+			return true;
+		}
+		_currentScript = "YotogiMain.ks";
 		GameMain.Instance.MainCamera.FadeOut(0.5f, false, () => {
 			KeepCostume = true;
 			StartCostumeEdit(maid, scene, profile, "*edeit_end");
@@ -304,10 +307,13 @@ internal class CostumeEdit {
 	[HarmonyPatch(typeof(SceneHoneymoonModeMain), nameof(SceneHoneymoonModeMain.OnClickMaidEdit))]
 	[HarmonyPrefix]
 	private static bool SceneHoneymoonModeMain_OnClickMaidEdit(SceneHoneymoonModeMain __instance) {
-		_currentScript = "HoneymoonModeMain.ks";
 		var maid = __instance.manager.targetMaid;
 		var scene = CostumeScene.Honeymoon;
 		var profile = DressCode.GetPreferredProfile(maid, scene);
+		if (profile == CostumeProfile.Default) {
+			return true;
+		}
+		_currentScript = "HoneymoonModeMain.ks";
 		GameMain.Instance.MainCamera.FadeOut(0.5f, false, () => {
 			KeepCostume = true;
 			StartCostumeEdit(maid, scene, profile, "*メイン画面");
