@@ -12,13 +12,8 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.DressCode;
 
-/*
- * TODO
- * 
- * Hair (?)
- * CharacterSelect thumbnail
- * 
- */
+// TODO Hair (?)
+// TODO CharacterSelect thumbnail
 
 [BepInPlugin("net.perdition.com3d2.dresscode", PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 [BepInDependency("net.perdition.com3d2.editbodyloadfix", BepInDependency.DependencyFlags.SoftDependency)]
@@ -44,7 +39,6 @@ public partial class DressCode : BaseUnityPlugin {
 	};
 
 	private void Awake() {
-		SceneManager.sceneLoaded += OnSceneLoaded;
 		SceneManager.sceneUnloaded += OnSceneUnloaded;
 
 		_logger = Logger;
@@ -281,11 +275,20 @@ public partial class DressCode : BaseUnityPlugin {
 		return costumeScene;
 	}
 
-	private static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-		var costumeScene = GetCostumeScene(scene.name);
+	private static void OnSceneUnloaded(Scene scene) {
+		var prevSceneName = scene.name;
+		var nextSceneName = GameMain.Instance.GetNowSceneName();
+		var nextCostumeScene = GetCostumeScene(nextSceneName);
+
+		// do not load costumes when entering or leaving edit mode while in a dress code scene
+		if (nextSceneName == "SceneEdit" && (CostumeEdit.KeepCostume || PrivateModeMgr.Instance.PrivateMaid)) return;
+		if (prevSceneName == "SceneEdit" && CostumeEdit.KeepCostume) {
+			CostumeEdit.KeepCostume = false;
+			return;
+		}
 
 		// reload private mode costume between private mode events
-		if (scene.name == "ScenePrivateEventMode" && _activeCostumeScene == CostumeScene.PrivateMode) {
+		if (_activeCostumeScene == CostumeScene.PrivateMode && nextSceneName == "ScenePrivateEventMode") {
 			var maid = PrivateModeMgr.Instance.PrivateMaid;
 			if (TryGetEffectiveCostume(maid, CostumeScene.PrivateMode, out var costume)) {
 				LogDebug("Reloading private mode costume...");
@@ -296,90 +299,80 @@ public partial class DressCode : BaseUnityPlugin {
 			return;
 		}
 
-		// reload honeymoon costume between honeymoon events
-		if (scene.name == "SceneHoneymoonMode" && _activeCostumeScene == CostumeScene.Honeymoon) {
+		if (_activeCostumeScene == CostumeScene.Honeymoon) {
+			// reload honeymoon costume between honeymoon events
+			if (nextSceneName == "SceneHoneymoonMode") {
+				var maid = HoneymoonManager.Instance.targetMaid;
+				if (_temporaryCostume.ContainsKey(maid.status.guid)) {
+					if (TryGetEffectiveCostume(maid, CostumeScene.Honeymoon, out var costume)) {
+						LogDebug("Reloading honeymoon costume...");
+						_isReloadingCostume = true;
+						LoadCostume(maid, costume, false, true);
+						_isReloadingCostume = false;
+					}
+				}
+				return;
+			}
+
+			// do not switch costume for honeymoon yotogi
+			if (nextCostumeScene == CostumeScene.Yotogi) {
+				return;
+			}
+
+		// reload honeymoon costume for honeymoon yotogi
+			if (GetCostumeScene(prevSceneName) == CostumeScene.Yotogi) {
 			var maid = HoneymoonManager.Instance.targetMaid;
-			if (_temporaryCostume.ContainsKey(maid.status.guid)) {
-				if (TryGetEffectiveCostume(maid, CostumeScene.Honeymoon, out var costume)) {
-					LogDebug("Reloading honeymoon costume...");
-					_isReloadingCostume = true;
-					LoadCostume(maid, costume, false, true);
-					_isReloadingCostume = false;
+			if (TryGetEffectiveCostume(maid, CostumeScene.Honeymoon, out var costume)) {
+				LogDebug("Reloading honeymoon costume...");
+				LoadCostume(maid, costume);
 				}
 				return;
 			}
 		}
 
-		// reload honeymoon costume for honeymoon yotogi
-		if (costumeScene == CostumeScene.Yotogi && _activeCostumeScene == CostumeScene.Honeymoon) {
-			var maid = HoneymoonManager.Instance.targetMaid;
-			if (TryGetEffectiveCostume(maid, CostumeScene.Honeymoon, out var costume)) {
-				LogDebug("Reloading honeymoon costume...");
-				LoadCostume(maid, costume);
-			}
-			return;
-		}
-
-		// keep certain costumes during SceneADV scenes
-		if ((scene.name == "SceneADV" || scene.name == "SceneEyecatch") && PersistentCostumeScenes.Contains(_activeCostumeScene)) {
-			return;
-		}
-
-		if (costumeScene != _activeCostumeScene) {
-			_activeCostumeScene = costumeScene;
-			if (PersistentCostumeScenes.Contains(_activeCostumeScene)) {
-				LogDebug($"{_activeCostumeScene} scene started.");
+		if (PersistentCostumeScenes.Contains(_activeCostumeScene)) {
+			// keep persistent costumes during intermediate scenes
+			if (nextSceneName == "SceneADV" || nextSceneName == "SceneEyecatch") {
+				return;
+			} else if (nextCostumeScene != _activeCostumeScene) {
+				// end persistent scene if not loading the scene itself or an intermediate scene
+				LogDebug($"{_activeCostumeScene} persistent scene ended.");
+				_activeCostumeScene = CostumeScene.None;
 			}
 		}
 
-		if (costumeScene == CostumeScene.None) return;
-
-		var numMaids = GameMain.Instance.CharacterMgr.GetMaidCount();
-		for (var i = 0; i < numMaids; i++) {
-			var maid = GameMain.Instance.CharacterMgr.GetMaid(i);
-			if (maid != null && maid.body0) {
-				if (costumeScene == CostumeScene.Honeymoon) {
-					maid.Visible = true;
+		// reset costumes if no scene is active
+		if (_activeCostumeScene == CostumeScene.None) {
+			var numMaids = GameMain.Instance.CharacterMgr.GetMaidCount();
+			for (var i = 0; i < numMaids; i++) {
+				var maid = GameMain.Instance.CharacterMgr.GetMaid(i);
+				if (maid != null && maid.body0) {
+					ResetCostume(maid);
 				}
-				SetCostume(maid, costumeScene, TemporaryCostumeScenes.Contains(costumeScene));
+			}
+			_originalCostume.Clear();
+			_temporaryCostume.Clear();
+		}
+
+		if (nextCostumeScene != _activeCostumeScene) {
+			_activeCostumeScene = nextCostumeScene;
+			if (PersistentCostumeScenes.Contains(_activeCostumeScene)) {
+				LogDebug($"{_activeCostumeScene} persistent scene started.");
 			}
 		}
-	}
 
-	private static void OnSceneUnloaded(Scene scene) {
-		var nextScene = GameMain.Instance.GetNowSceneName();
-		var costumeScene = GetCostumeScene(nextScene);
-
-		// do not load costumes when entering or leaving edit mode while in a dress code scene
-		if (nextScene == "SceneEdit" && (CostumeEdit.KeepCostume || PrivateModeMgr.Instance.PrivateMaid)) return;
-		if (scene.name == "SceneEdit" && CostumeEdit.KeepCostume) {
-			CostumeEdit.KeepCostume = false;
-			return;
-		}
-
-		// do not switch costume for honeymoon yotogi
-		if (costumeScene == CostumeScene.Yotogi && _activeCostumeScene == CostumeScene.Honeymoon) {
-			return;
-		}
-
-		// end persistent scene if not loading the scene itself or SceneADV
-		if (nextScene != "SceneADV" && nextScene != "SceneEyecatch" && costumeScene != _activeCostumeScene && PersistentCostumeScenes.Contains(_activeCostumeScene)) {
-			LogDebug($"{_activeCostumeScene} scene ended.");
-			_activeCostumeScene = CostumeScene.None;
-		}
-
-		// do not reset any costumes if a scene is still active
-		if (_activeCostumeScene != CostumeScene.None) return;
-
-		var numMaids = GameMain.Instance.CharacterMgr.GetMaidCount();
-		for (var i = 0; i < numMaids; i++) {
-			var maid = GameMain.Instance.CharacterMgr.GetMaid(i);
-			if (maid != null && maid.body0) {
-				ResetCostume(maid);
+		if (nextCostumeScene != CostumeScene.None) {
+			var numMaids = GameMain.Instance.CharacterMgr.GetMaidCount();
+			for (var i = 0; i < numMaids; i++) {
+				var maid = GameMain.Instance.CharacterMgr.GetMaid(i);
+				if (maid != null && maid.body0) {
+					if (nextCostumeScene == CostumeScene.Honeymoon) {
+						maid.Visible = true;
+					}
+					SetCostume(maid, nextCostumeScene, TemporaryCostumeScenes.Contains(nextCostumeScene));
+				}
 			}
 		}
-		_originalCostume.Clear();
-		_temporaryCostume.Clear();
 	}
 
 	[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.Deactivate))]
