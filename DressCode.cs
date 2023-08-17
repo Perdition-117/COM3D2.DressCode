@@ -259,11 +259,11 @@ public partial class DressCode : BaseUnityPlugin {
 
 	private static CostumeScene GetCostumeScene(string sceneName) {
 		var costumeScene = CostumeScene.None;
-		if (sceneName == "SceneYotogi") {
+		if (sceneName == SceneName.Yotogi) {
 			costumeScene = CostumeScene.Yotogi;
-		} else if (sceneName == "ScenePrivate" || sceneName == "ScenePrivateEventMode") {
+		} else if (sceneName == SceneName.PrivateMode || sceneName == SceneName.PrivateModeEvent) {
 			costumeScene = CostumeScene.PrivateMode;
-		} else if (sceneName == "SceneHoneymoonMode") {
+		} else if (sceneName == SceneName.Honeymoon) {
 			costumeScene = CostumeScene.Honeymoon;
 		} else if (sceneName.StartsWith("SceneDance") && DanceMain.SelectDanceData != null) {
 			if (DanceMain.SelectDanceData.RhythmGameCorrespond) {
@@ -281,14 +281,14 @@ public partial class DressCode : BaseUnityPlugin {
 		var nextCostumeScene = GetCostumeScene(nextSceneName);
 
 		// do not load costumes when entering or leaving edit mode while in a dress code scene
-		if (nextSceneName == "SceneEdit" && (CostumeEdit.KeepCostume || PrivateModeMgr.Instance.PrivateMaid)) return;
-		if (prevSceneName == "SceneEdit" && CostumeEdit.KeepCostume) {
+		if (nextSceneName == SceneName.Edit && (CostumeEdit.KeepCostume || PrivateModeMgr.Instance.PrivateMaid)) return;
+		if (prevSceneName == SceneName.Edit && CostumeEdit.KeepCostume) {
 			CostumeEdit.KeepCostume = false;
 			return;
 		}
 
 		// reload private mode costume between private mode events
-		if (_activeCostumeScene == CostumeScene.PrivateMode && nextSceneName == "ScenePrivateEventMode") {
+		if (_activeCostumeScene == CostumeScene.PrivateMode && nextSceneName == SceneName.PrivateModeEvent) {
 			var maid = PrivateModeMgr.Instance.PrivateMaid;
 			if (TryGetEffectiveCostume(maid, CostumeScene.PrivateMode, out var costume)) {
 				LogDebug("Reloading private mode costume...");
@@ -301,7 +301,7 @@ public partial class DressCode : BaseUnityPlugin {
 
 		if (_activeCostumeScene == CostumeScene.Honeymoon) {
 			// reload honeymoon costume between honeymoon events
-			if (nextSceneName == "SceneHoneymoonMode") {
+			if (nextSceneName == SceneName.Honeymoon) {
 				var maid = HoneymoonManager.Instance.targetMaid;
 				if (_temporaryCostume.ContainsKey(maid.status.guid)) {
 					if (TryGetEffectiveCostume(maid, CostumeScene.Honeymoon, out var costume)) {
@@ -332,7 +332,7 @@ public partial class DressCode : BaseUnityPlugin {
 
 		if (PersistentCostumeScenes.Contains(_activeCostumeScene)) {
 			// keep persistent costumes during intermediate scenes
-			if (nextSceneName == "SceneADV" || nextSceneName == "SceneEyecatch") {
+			if (nextSceneName == SceneName.Adv || nextSceneName == SceneName.Eyecatch) {
 				return;
 			} else if (nextCostumeScene != _activeCostumeScene) {
 				// end persistent scene if not loading the scene itself or an intermediate scene
