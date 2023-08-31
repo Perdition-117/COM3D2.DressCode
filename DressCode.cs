@@ -311,6 +311,8 @@ public partial class DressCode : BaseUnityPlugin {
 						LoadCostume(maid, costume, false, true);
 						_isReloadingCostume = false;
 					} else {
+						maid.AllProcPropSeqStart();
+						maid.Visible = true;
 						SetCostume(maid, CostumeScene.Honeymoon, true);
 					}
 				}
@@ -319,9 +321,9 @@ public partial class DressCode : BaseUnityPlugin {
 
 			// set permanent honeymoon costume for honeymoon yotogi
 			if (nextCostumeScene == CostumeScene.Yotogi) {
+				LogDebug("Honeymoon yotogi started.");
 				var maid = HoneymoonManager.Instance.targetMaid;
 				if (TryGetEffectiveCostume(maid, CostumeScene.Honeymoon, out var costume)) {
-					LogDebug("Reloading honeymoon costume...");
 					RemoveTemporaryCostume(maid);
 					SetCostume(maid, CostumeScene.Honeymoon);
 				}
@@ -330,11 +332,10 @@ public partial class DressCode : BaseUnityPlugin {
 
 			// restore permanent costume after honeymoon yotogi
 			if (GetCostumeScene(prevSceneName) == CostumeScene.Yotogi) {
+				LogDebug("Honeymoon yotogi ended.");
 				var maid = HoneymoonManager.Instance.targetMaid;
 				if (_originalCostume.ContainsKey(maid.status.guid)) {
-					LogDebug("Reloading honeymoon costume...");
 					RestoreCostume(maid);
-					maid.AllProcPropSeqStart();
 				}
 				return;
 			}
