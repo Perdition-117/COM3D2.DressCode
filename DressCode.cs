@@ -448,7 +448,34 @@ public partial class DressCode : BaseUnityPlugin {
 	[HarmonyPatch(typeof(Maid), nameof(Maid.ResetProp), typeof(MaidProp), typeof(bool))]
 	[HarmonyPrefix]
 	private static bool Maid_ResetProp(Maid __instance, MaidProp mp) {
-		return !((_activeCostumeScene == CostumeScene.PrivateMode || _activeCostumeScene == CostumeScene.Honeymoon) && !_isReloadingCostume && _temporaryCostume.ContainsKey(__instance.status.guid));
+		if ((_activeCostumeScene == CostumeScene.PrivateMode || _activeCostumeScene == CostumeScene.Honeymoon) && !_isReloadingCostume && _temporaryCostume.TryGetValue(__instance.status.guid, out var costume)) {
+			var mpn = (MPN)mp.idx;
+			var hasItem = costume.TryGetItem(mpn, out var item) && item.FileName != string.Empty;
+			if (hasItem) {
+				if (!item.IsEnabled) {
+					// allow resetting the item if the costume slot is not enabled
+					return true;
+				} else if (item.FileName != mp.strTempFileName) {
+					// revert temporary script item to costume item
+					__instance.SetProp(mpn, item.FileName, 0, true);
+				}
+			} else {
+				// remove temporary script item
+				__instance.DelProp(mpn, true);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	// hack to prevent error after certain scenes (private mode event)
+	[HarmonyPatch(typeof(TBodySkin), nameof(TBodySkin.CoReFixBlendValues))]
+	[HarmonyPostfix]
+	private static IEnumerator TBodySkin_CoReFixBlendValues(IEnumerator __result, TBodySkin __instance) {
+		while (__result.MoveNext()) {
+			yield return __result.Current;
+			if (__instance.morph == null) yield break;
+		}
 	}
 
 	[HarmonyPatch(typeof(SceneMgr), nameof(SceneMgr.Start))]
