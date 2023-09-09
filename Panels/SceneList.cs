@@ -1,4 +1,4 @@
-﻿using I2.Loc;
+using I2.Loc;
 using wf;
 
 namespace COM3D2.DressCode;
@@ -66,8 +66,14 @@ internal class SceneList : ScrollViewPanel {
 
 	public event EventHandler<SceneSelectedEventArgs> SceneSelected;
 
+	public CostumeScene SelectedScene { get; private set; }
+
 	protected virtual void OnSceneSelected(SceneSelectedEventArgs e) {
 		SceneSelected?.Invoke(this, e);
+	}
+
+	public void SelectScene(CostumeScene scene) {
+		_tabPanel.Select(_tabButtons[scene]);
 	}
 
 	public void SelectFirstAvailable() {
@@ -111,7 +117,10 @@ internal class SceneList : ScrollViewPanel {
 		buttonSprite.width += ExtraWidth;
 
 		var tabButton = button.GetComponent<UIWFTabButton>();
-		tabButton.onClick.Add(new(() => OnSceneSelected(new() { Scene = scene })));
+		tabButton.onClick.Add(new(() => {
+			SelectedScene = scene;
+			OnSceneSelected(new() { Scene = scene });
+		}));
 		_tabButtons.Add(scene, tabButton);
 
 		return tabButton;

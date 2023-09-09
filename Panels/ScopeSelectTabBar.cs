@@ -1,4 +1,4 @@
-﻿namespace COM3D2.DressCode;
+namespace COM3D2.DressCode;
 
 internal class ScopeSelectTabBar : CanvasComponent {
 	private readonly RadioButtonGroup<RadioButton, ProfileScope> _radioButtonGroup;
@@ -22,6 +22,7 @@ internal class ScopeSelectTabBar : CanvasComponent {
 		_radioButtonGroup = new(tabButtonList);
 		_radioButtonGroup.ValueChanged += (o, e) => {
 			if (e.IsSelected) {
+				SelectedScope = e.Value;
 				OnScopeSelected(new() { Scope = e.Value });
 			}
 		};
@@ -31,6 +32,8 @@ internal class ScopeSelectTabBar : CanvasComponent {
 	}
 
 	public event EventHandler<ScopeSelectedEventArgs> ScopeSelected;
+
+	public ProfileScope SelectedScope { get; private set; }
 
 	protected virtual void OnScopeSelected(ScopeSelectedEventArgs e) {
 		ScopeSelected?.Invoke(this, e);

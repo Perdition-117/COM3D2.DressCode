@@ -1,4 +1,4 @@
-﻿namespace COM3D2.DressCode;
+namespace COM3D2.DressCode;
 
 internal class MaidSelectPanel : ScrollViewPanel {
 	private readonly CharacterSelectManager _characterSelectManager;
@@ -63,8 +63,12 @@ internal class MaidSelectPanel : ScrollViewPanel {
 		MaidSelected?.Invoke(this, e);
 	}
 
-	public void Initialize(CharacterSelectManager.Type type) {
-		_characterSelectManager.Create(type);
+	public void Initialize() {
+		_characterSelectManager.Create(CharacterSelectManager.Type.Select);
+	}
+
+	public void SelectMaid(Maid maid) {
+		_characterSelectManager.SelectMaid(maid);
 	}
 
 	private void GetMaidList(List<Maid> drawMaidList) {

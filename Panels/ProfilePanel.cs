@@ -1,6 +1,7 @@
-﻿namespace COM3D2.DressCode;
+namespace COM3D2.DressCode;
 
 internal class ProfilePanel : CanvasComponent {
+	private readonly DressCodeControl _parentControl;
 	private readonly ThumbnailPanel _thumbnailPanel;
 	private readonly CanvasComponent _buttonGroup;
 	private readonly RadioButtonGroup<ProfileRadioButton, CostumeProfile> _toggleGroup;
@@ -8,7 +9,9 @@ internal class ProfilePanel : CanvasComponent {
 	private CostumeProfile _selectedProfile;
 	private bool _noEventTrigger = false;
 
-	public ProfilePanel(CanvasComponent parent) : base(parent, nameof(ProfilePanel)) {
+	public ProfilePanel(CanvasComponent parent, DressCodeControl parentControl) : base(parent, nameof(ProfilePanel)) {
+		_parentControl = parentControl;
+
 		SizeDelta = new(956, 830);
 		Position = new(372, 45);
 
@@ -45,7 +48,7 @@ internal class ProfilePanel : CanvasComponent {
 			Term = "SceneLabel",
 			Description = "SceneDescription",
 		};
-		button2.EditClicked += () => CostumeEdit.StartCostumeEdit(SelectedScene);
+		button2.EditClicked += () => CostumeEdit.StartCostumeEdit(_parentControl.SelectedScene);
 		_toggleGroup.AddButton(button2, CostumeProfile.Scene);
 
 		var button3 = new ProfileRadioButton(_buttonGroup, "Personal") {
@@ -53,7 +56,7 @@ internal class ProfilePanel : CanvasComponent {
 			Term = "PersonalLabel",
 			Description = "PersonalDescription",
 		};
-		button3.EditClicked += () => CostumeEdit.StartCostumeEdit(SelectedMaid, SelectedScene);
+		button3.EditClicked += () => CostumeEdit.StartCostumeEdit(_parentControl.SelectedMaid, _parentControl.SelectedScene);
 		button3.ShowButton();
 		_toggleGroup.AddButton(button3, CostumeProfile.Personal);
 
@@ -76,9 +79,6 @@ internal class ProfilePanel : CanvasComponent {
 	}
 
 	public event EventHandler<ProfileSelectedEventArgs> ProfileSelected;
-
-	public Maid SelectedMaid { get; set; }
-	public CostumeScene SelectedScene { get; set; }
 
 	protected virtual void OnProfileSelected(ProfileSelectedEventArgs e) {
 		ProfileSelected?.Invoke(this, e);
@@ -114,9 +114,9 @@ internal class ProfilePanel : CanvasComponent {
 
 	private void UpdateThumbnail() {
 		_thumbnailPanel.ThumbnailImage = _selectedProfile switch {
-			CostumeProfile.Default => SelectedMaid?.GetThumCard(),
-			CostumeProfile.Scene => DressCode.GetThumbnail(SelectedScene, null),
-			CostumeProfile.Personal => DressCode.GetThumbnail(SelectedScene, SelectedMaid),
+			CostumeProfile.Default => (_parentControl.SelectedScope == ProfileScope.Maid ? _parentControl.SelectedMaid : DressCode.GetHeadMaid()).GetThumCard(),
+			CostumeProfile.Scene => DressCode.GetThumbnail(_parentControl.SelectedScene, null),
+			CostumeProfile.Personal => DressCode.GetThumbnail(_parentControl.SelectedScene, _parentControl.SelectedMaid),
 			_ => throw new NotImplementedException(),
 		};
 	}
