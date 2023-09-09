@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using com.workman.cm3d2.scene.dailyEtc;
 using HarmonyLib;
 using Honeymoon;
@@ -89,12 +89,12 @@ internal class CostumeEdit {
 			maid.Visible = true;
 			maid.AllProcPropSeqStart();
 			GameMain.instance.StartCoroutine(DressCode.WaitMaidPropBusy(maid, () => {
-				StartCostumeEdit(maid, scene, profile, DayTimeLabels[_currentDayTime]);
+				StartCostumeEdit(maid, scene, profile, DayTimeLabels[_currentDayTime], true);
 			}));
 		});
 	}
 
-	private static void StartCostumeEdit(Maid maid, CostumeScene scene, CostumeProfile profile, string label) {
+	private static void StartCostumeEdit(Maid maid, CostumeScene scene, CostumeProfile profile, string label, bool reopenPanel = false) {
 		_currentScene = scene;
 		DressCode.LogDebug($"Starting scene edit for {scene} ({profile})...");
 		var costume = CreateCostume(maid, scene, profile);
@@ -102,7 +102,7 @@ internal class CostumeEdit {
 		maid.AllProcPropSeqStart();
 		GameMain.instance.StartCoroutine(DressCode.WaitMaidPropBusy(maid, () => {
 			var scriptMgr = GameMain.Instance.ScriptMgr;
-			scriptMgr.adv_kag.kag.LoadScenarioString($"@SceneCall name=SceneEdit {DressCode.ScriptTag}={profile} label={label}");
+			scriptMgr.adv_kag.kag.LoadScenarioString($"@SceneCall name=SceneEdit label={label} {DressCode.ScriptTag}={profile} {(reopenPanel ? DressCode.ReopenPanelTag : string.Empty)}");
 			scriptMgr.adv_kag.kag.Exec();
 		}));
 	}
@@ -223,6 +223,12 @@ internal class CostumeEdit {
 		EventDelegate.Add(__instance.EditTouchJumpSwitch.onClick, __instance.OnClickEditTouchJump);
 
 		return false;
+	}
+
+	[HarmonyPatch(typeof(SceneEdit), nameof(SceneEdit.OnEndScene))]
+	[HarmonyPrefix]
+	private static void PreEndScene(SceneEdit __instance) {
+		DressCode.ReopenPanel = GameMain.Instance.ScriptMgr.adv_kag.tag_backup.ContainsKey(DressCode.ReopenPanelTag);
 	}
 
 	[HarmonyPatch(typeof(SceneEdit), nameof(SceneEdit.OnEndScene))]

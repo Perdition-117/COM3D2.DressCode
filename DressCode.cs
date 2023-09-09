@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.IO;
 using BepInEx;
 using BepInEx.Logging;
@@ -19,6 +19,7 @@ namespace COM3D2.DressCode;
 [BepInDependency("net.perdition.com3d2.editbodyloadfix", BepInDependency.DependencyFlags.SoftDependency)]
 public partial class DressCode : BaseUnityPlugin {
 	internal const string ScriptTag = "dresscode";
+	internal const string ReopenPanelTag = "dresscodereopen";
 
 	private static ManualLogSource _logger;
 	private static Configuration _config;
@@ -38,6 +39,8 @@ public partial class DressCode : BaseUnityPlugin {
 		CostumeScene.PrivateMode,
 		CostumeScene.Honeymoon,
 	};
+
+	internal static bool ReopenPanel { get; set; } = false;
 
 	private void Awake() {
 		SceneManager.sceneUnloaded += OnSceneUnloaded;
@@ -509,16 +512,29 @@ public partial class DressCode : BaseUnityPlugin {
 		value.GetComponent<UILabel>().text = "DressCode";
 		EventDelegate.Add(button.GetComponent<UIButton>().onClick, () => {
 			GameMain.Instance.MainCamera.FadeOut(0.5f, false, () => {
-				var maid = PrivateModeMgr.Instance.PrivateMaid;
-				if (maid != null) {
-					maid.Visible = false;
-				}
-				__instance.m_goPanel.gameObject.SetActive(false);
-				var manager = __instance.m_mgr.GetManager<DressCodeManager>();
-				manager.SetBackground();
-				manager.OpenPanel();
+				Open(__instance.m_mgr);
 				GameMain.Instance.MainCamera.FadeIn();
 			});
 		});
+	}
+
+	[HarmonyPatch(typeof(BasePanelMgr), nameof(BasePanelMgr.BeforeFadeIn))]
+	[HarmonyPrefix]
+	private static void BasePanelMgr_BeforeFadeIn(BasePanelMgr __instance) {
+		if (__instance is DailyMgr dailyMgr && ReopenPanel) {
+			ReopenPanel = false;
+			Open(dailyMgr);
+		}
+	}
+
+	private static void Open(DailyMgr dailyMgr) {
+		var maid = PrivateModeMgr.Instance.PrivateMaid;
+		if (maid != null) {
+			maid.Visible = false;
+		}
+		dailyMgr.m_ctrl.m_goPanel.gameObject.SetActive(false);
+		var manager = dailyMgr.GetManager<DressCodeManager>();
+		manager.SetBackground();
+		manager.OpenPanel();
 	}
 }
