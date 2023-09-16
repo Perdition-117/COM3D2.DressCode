@@ -3,10 +3,11 @@ using wf;
 
 namespace COM3D2.DressCode;
 
-internal class SceneList : ScrollViewPanel {
-	private const int ExtraWidth = 20;
+internal class SceneList : GridScrollViewPanel {
+	private const int ButtonExtraWidth = 20;
 
-	private readonly BaseComponent _gridParent;
+	private static readonly Vector2 PanelSize = new(174, 848);
+
 	private readonly UIWFTabPanel _tabPanel;
 	private readonly Dictionary<CostumeScene, UIWFTabButton> _tabButtons = new();
 
@@ -24,38 +25,18 @@ internal class SceneList : ScrollViewPanel {
 	};
 
 	public SceneList(BaseComponent parent) : base(parent, nameof(SceneList)) {
-		ScrollWheelFactor = 3;
-		ClipRegion = new(0, 0, 156, 809);
 		ContentPivot = UIWidget.Pivot.Center;
 
-		Background.GetComponent<UISprite>().width = 174;
-		Background.GetComponent<UISprite>().height = 848;
+		Size = PanelSize;
 
-		Content.Position = new(-4, 18);
+		Grid.cellHeight = 63;
+		Grid.pivot = UIWidget.Pivot.Center;
 
-		DragMat.Position = new(-910, 454);
-		DragMat.GetComponent<UIWidget>().width = 147;
-		DragMat.GetComponent<UIWidget>().height = 760;
+		ScrollChild.AddComponent<UICenterOnChild>().enabled = false;
 
-		var scrollBar = new ScrollBar(this, "Scroll Bar");
+		ScrollValue = 0.5f;
 
-		ScrollBar = scrollBar.GetComponent<UIScrollBar>();
-		ScrollBar.value = 0.5f;
-
-		_gridParent = Content.AddChild("GridParent");
-		_gridParent.Position = new(0, 56);
-
-		_gridParent.AddComponent<UICenterOnChild>().enabled = false;
-
-		var grid = _gridParent.AddComponent<UIGrid>();
-		grid.arrangement = UIGrid.Arrangement.Vertical;
-		grid.cellHeight = 63;
-		grid.cellWidth = 0;
-		//grid.keepWithinPanel = true;
-		grid.pivot = UIWidget.Pivot.Center;
-
-		//_gridParent.AddComponent<UIWFSwitchPanel>();
-		_tabPanel = _gridParent.AddComponent<UIWFTabPanel>();
+		_tabPanel = ScrollChild.AddComponent<UIWFTabPanel>();
 
 		foreach (var scene in _scenes) {
 			AddButton(scene.Key, scene.Value);
@@ -77,7 +58,7 @@ internal class SceneList : ScrollViewPanel {
 	}
 
 	public void SelectFirstAvailable() {
-		foreach (var child in _gridParent.GetComponent<UIGrid>().GetChildList()) {
+		foreach (var child in ScrollChild.GetComponent<UIGrid>().GetChildList()) {
 			var tabButton = child.gameObject.GetComponentInChildren<UIWFTabButton>();
 			if (tabButton.isEnabled) {
 				_tabPanel.Select(tabButton);
@@ -98,15 +79,15 @@ internal class SceneList : ScrollViewPanel {
 	}
 
 	public UIWFTabButton AddButton(string term, CostumeScene scene) {
-		var gameObject = Utility.CreatePrefab(_gridParent.GameObject, "SceneYotogi/SkillSelect/Prefab/CategoryBtn", true);
+		var gameObject = Utility.CreatePrefab(ScrollChild.GameObject, "SceneYotogi/SkillSelect/Prefab/CategoryBtn", true);
 		gameObject.name = term;
 
 		var frameSprite = UTY.GetChildObject(gameObject, "Frame").GetComponent<UISprite>();
-		frameSprite.width += ExtraWidth;
+		frameSprite.width += ButtonExtraWidth;
 
 		var label = UTY.GetChildObject(gameObject, "Label").GetComponent<UILabel>();
 		label.spacingX = 0;
-		label.width += ExtraWidth;
+		label.width += ButtonExtraWidth;
 
 		var localize = label.GetComponent<Localize>();
 		localize.Term = DressCode.GetTermKey(term);
@@ -114,7 +95,7 @@ internal class SceneList : ScrollViewPanel {
 		var button = UTY.GetChildObject(gameObject, "Button");
 
 		var buttonSprite = button.GetComponent<UISprite>();
-		buttonSprite.width += ExtraWidth;
+		buttonSprite.width += ButtonExtraWidth;
 
 		var tabButton = button.GetComponent<UIWFTabButton>();
 		tabButton.onClick.Add(new(() => {
