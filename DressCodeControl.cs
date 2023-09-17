@@ -17,8 +17,8 @@ internal class DressCodeControl : MonoBehaviour {
 	}
 
 	public CostumeScene SelectedScene {
-		get => _sceneList.SelectedScene;
-		set => _sceneList.SelectScene(value);
+		get => _sceneList.SelectedValue;
+		set => _sceneList.SelectValue(value);
 	}
 
 	public Maid SelectedMaid {
@@ -44,7 +44,7 @@ internal class DressCodeControl : MonoBehaviour {
 		_maidSelectPanel.MaidSelected += (o, e) => UpdateMaidSelection();
 
 		_sceneList = new SceneList(panel);
-		_sceneList.SceneSelected += (o, e) => UpdateProfileSelection();
+		_sceneList.ValueSelected += (o, e) => UpdateProfileSelection();
 
 		_profilePanel = new ProfilePanel(panel, this);
 		_profilePanel.ProfileSelected += OnProfileChanged;
