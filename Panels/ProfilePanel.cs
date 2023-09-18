@@ -4,7 +4,7 @@ internal class ProfilePanel : CanvasComponent {
 	private const int ThumbnailPanelWidth = 615;
 	private const int ButtonSpacing = 115;
 
-	private static readonly Vector2 PanelSize = new(956, 830);
+	private static readonly Vector2 PanelSize = new(890, 830);
 
 	private readonly DressCodeControl _parentControl;
 	private readonly ThumbnailPanel _thumbnailPanel;

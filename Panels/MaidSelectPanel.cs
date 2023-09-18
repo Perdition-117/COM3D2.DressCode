@@ -1,17 +1,10 @@
 namespace COM3D2.DressCode;
 
 internal class MaidSelectPanel : GridScrollViewPanel {
-	private static readonly Vector2 PanelSize = new(502, 1080);
-
 	private readonly CharacterSelectManager _characterSelectManager;
 
 	public MaidSelectPanel(CanvasComponent parent) : base(parent, nameof(MaidSelectPanel)) {
-		Position = new(-690, 0);
 		ContentPivot = UIWidget.Pivot.Top;
-
-		Size = PanelSize;
-
-		ScrollChild.Position = new(0, PanelSize.y / 2 - 112.5f);
 
 		Grid.cellHeight = 130;
 		Grid.pivot = UIWidget.Pivot.Top;
@@ -34,13 +27,9 @@ internal class MaidSelectPanel : GridScrollViewPanel {
 		MaidSelected?.Invoke(this, e);
 	}
 
-	public void Initialize() {
-		_characterSelectManager.Create(CharacterSelectManager.Type.Select);
-	}
+	public void Initialize() => _characterSelectManager.Create(CharacterSelectManager.Type.Select);
 
-	public void SelectMaid(Maid maid) {
-		_characterSelectManager.SelectMaid(maid);
-	}
+	public void SelectMaid(Maid maid) => _characterSelectManager.SelectMaid(maid);
 
 	private void GetMaidList(List<Maid> drawMaidList) {
 		var characterManager = GameMain.Instance.CharacterMgr;

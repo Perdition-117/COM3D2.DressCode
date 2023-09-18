@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Localization>
 	<Language Code="en">
 		<Term Key="BackButton" Translation="Back" />
 		
-		<Term Key="SceneSetting" Translation="Scene settings" />
-		<Term Key="MaidSetting" Translation="Maid settings" />
+		<Term Key="SceneSetting" Translation="Scene" />
+		<Term Key="MaidSetting" Translation="Maid" />
 		
 		<Term Key="SceneDance" Translation="Dance" />
 		<Term Key="ScenePoleDance" Translation="Pole dance" />
@@ -24,6 +24,9 @@
 		<Term Key="EditButton" Translation="Edit" />
 	</Language>
 	<Language Code="ja">
+		<Term Key="SceneSetting" Translation="シーン" />
+		<Term Key="MaidSetting" Translation="メイド" />
+
 		<Term Key="SceneDance" Translation="ダンス" />
 		<Term Key="ScenePoleDance" Translation="ポールダンス" />
 		<Term Key="SceneYotogi" Translation="夜伽" />

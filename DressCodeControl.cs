@@ -3,22 +3,30 @@ using PrivateMaidMode;
 namespace COM3D2.DressCode;
 
 internal class DressCodeControl : MonoBehaviour {
-	private ScopeSelectTabBar _scopeSelectTabBar;
-	private MaidSelectPanel _maidSelectPanel;
+	private const int UiWidth = 1920;
+
+	private static readonly Vector3 PanelMargin = new(15, 0);
+	private static readonly Vector2 SceneListSize = new(184, 925);
+	private static readonly Vector2 ScopeListSize = new(144, 925);
+	private static readonly Vector2 MaidListSize = new(502, 925);
+
 	private SceneList _sceneList;
+	private ScopeList _scopeList;
+	private MaidSelectPanel _maidSelectPanel;
 	private ProfilePanel _profilePanel;
 
 	private DressCodeManager m_mgr;
 	private GameObject m_goPanel;
 
-	public ProfileScope SelectedScope {
-		get => _scopeSelectTabBar.SelectedScope;
-		set => _scopeSelectTabBar.SelectScope(value);
-	}
 
 	public CostumeScene SelectedScene {
 		get => _sceneList.SelectedValue;
 		set => _sceneList.SelectValue(value);
+	}
+
+	public ProfileScope SelectedScope {
+		get => _scopeList.SelectedValue;
+		set => _scopeList.SelectValue(value);
 	}
 
 	public Maid SelectedMaid {
@@ -37,14 +45,22 @@ internal class DressCodeControl : MonoBehaviour {
 		panel.AddComponent<uGUICanvas>();
 		panel.AddComponent<GraphicRaycaster>();
 
-		_scopeSelectTabBar = new ScopeSelectTabBar(panel);
-		_scopeSelectTabBar.ScopeSelected += (o, e) => UpdateScopeSelection();
+		_sceneList = new SceneList(panel);
+		_sceneList.Position = new(-(UiWidth / 2) + SceneListSize.x / 2 + 41, 0);
+		_sceneList.Size = SceneListSize;
+		_sceneList.ValueSelected += (o, e) => UpdateProfileSelection();
+
+		_scopeList = new ScopeList(panel);
+		_scopeList.Position = _sceneList.Position + PanelMargin + new Vector3(SceneListSize.x / 2 + ScopeListSize.x / 2, 0);
+		_scopeList.Size = ScopeListSize;
+		_scopeList.ValueSelected += (o, e) => UpdateScopeSelection();
 
 		_maidSelectPanel = new MaidSelectPanel(panel);
+		_maidSelectPanel.Position = _scopeList.Position + PanelMargin + new Vector3(ScopeListSize.x / 2 + MaidListSize.x / 2, 0);
+		_maidSelectPanel.Size = MaidListSize;
 		_maidSelectPanel.MaidSelected += (o, e) => UpdateMaidSelection();
 
-		_sceneList = new SceneList(panel);
-		_sceneList.ValueSelected += (o, e) => UpdateProfileSelection();
+		_maidSelectPanel.ScrollChild.Position = new(0, MaidListSize.y / 2 - 112.5f);
 
 		_profilePanel = new ProfilePanel(panel, this);
 		_profilePanel.ProfileSelected += OnProfileChanged;
@@ -76,13 +92,11 @@ internal class DressCodeControl : MonoBehaviour {
 
 	private void SetSceneMode() {
 		_maidSelectPanel.SetActive(false);
-		_sceneList.Position = new(-832, 0);
 		_profilePanel.SetSceneMode();
 	}
 
 	private void SetMaidMode() {
 		_maidSelectPanel.SetActive(true);
-		_sceneList.Position = new(-337, 0);
 		_profilePanel.SetMaidMode();
 	}
 
