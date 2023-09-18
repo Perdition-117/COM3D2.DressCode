@@ -1,4 +1,4 @@
-﻿using UnityEngine.Events;
+using UnityEngine.Events;
 
 namespace COM3D2.DressCode;
 
@@ -9,27 +9,37 @@ internal class ProfileRadioButton : RadioButton {
 	private readonly Button _editButton;
 
 	public ProfileRadioButton(CanvasComponent parent, string name) : base(parent, name) {
-		SizeDelta = new(325, 50);
+		AnchorMin = new(0, 1);
+		AnchorMax = new(1, 1);
+		Pivot = new(0.5f, 1);
+		SizeDelta = new(-16, 50);
+
 		Checkmark.SizeDelta = new(-4, -4);
 
 		_description = AddChild("Description");
 		_description.AnchorMin = new(0, 0);
 		_description.AnchorMax = new(1, 0);
+		_description.Pivot = new(0.5f, 1);
 
 		var descriptionImage = _description.AddImage("edit_frame001B");
 		descriptionImage.fillCenter = false;
 		descriptionImage.raycastTarget = false;
 
 		_descriptionLabel = new Label(_description, "Text") {
+			AnchorMin = Vector2.zero,
+			AnchorMax = Vector2.one,
+			Pivot = new(0.5f, 0),
+			Alignment = TextAnchor.LowerCenter,
 			FontSize = 18,
 			RaycastTarget = false,
 		};
 
 		_editFrame = _description.AddChild("Edit");
-		_editFrame.SizeDelta = new(-25, 40);
 		_editFrame.AnchorMin = new(0, 1);
 		_editFrame.AnchorMax = new(1, 1);
-		_editFrame.Position = new(0, 14);
+		_editFrame.Pivot = new(0.5f, 1);
+		_editFrame.AnchoredPosition = new(0, -11);
+		_editFrame.SizeDelta = new(-25, 40);
 
 		_editButton = _editFrame.AddComponent<Button>();
 		_editButton.interactable = false;
@@ -44,7 +54,7 @@ internal class ProfileRadioButton : RadioButton {
 		};
 		editLabel.SetAllPoints();
 
-		HideEditButton();
+		ShowEditButton();
 	}
 
 	public string Description {
@@ -61,23 +71,15 @@ internal class ProfileRadioButton : RadioButton {
 		remove => _editButton.onClick.RemoveListener(value);
 	}
 
-	public void ShowButton() {
+	public void ShowEditButton() {
 		_editFrame.SetActive(true);
-
-		_descriptionLabel.SizeDelta = new(0, 45);
-		_descriptionLabel.Position = new(0, -22.5f);
-
 		_description.SizeDelta = new(0, 90);
-		_description.Position = new(0, -70);
+		_descriptionLabel.AnchoredPosition = new(0, 13.5f);
 	}
 
 	public void HideEditButton() {
 		_editFrame.SetActive(false);
-
-		_descriptionLabel.SetAllPoints();
-		_descriptionLabel.Position = new(0, 0);
-
 		_description.SizeDelta = new(0, 43);
-		_description.Position = new(0, -46.5f);
+		_descriptionLabel.AnchoredPosition = new(0, 12.5f);
 	}
 }

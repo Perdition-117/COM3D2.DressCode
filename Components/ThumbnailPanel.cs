@@ -1,14 +1,9 @@
-﻿namespace COM3D2.DressCode;
+namespace COM3D2.DressCode;
 
 internal class ThumbnailPanel : CanvasComponent {
 	private readonly RawImage _portraitImage;
 
 	public ThumbnailPanel(CanvasComponent parent, string name) : base(parent, name) {
-		SizeDelta = new(615, 830);
-		AnchorMin = new(1, 0.5f);
-		AnchorMax = new(1, 0.5f);
-		Position = new(170.5f, 0);
-
 		var backgroundOuter = AddImage("vr_frame02");
 		backgroundOuter.color = new(0.0471f, 0.0431f, 0.0902f, 0.9412f);
 

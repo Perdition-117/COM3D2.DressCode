@@ -1,6 +1,11 @@
 namespace COM3D2.DressCode;
 
 internal class ProfilePanel : CanvasComponent {
+	private const int ThumbnailPanelWidth = 615;
+	private const int ButtonSpacing = 115;
+
+	private static readonly Vector2 PanelSize = new(956, 830);
+
 	private readonly DressCodeControl _parentControl;
 	private readonly ThumbnailPanel _thumbnailPanel;
 	private readonly CanvasComponent _buttonGroup;
@@ -9,17 +14,45 @@ internal class ProfilePanel : CanvasComponent {
 	private CostumeProfile _selectedProfile;
 	private bool _noEventTrigger = false;
 
+	private static readonly ProfileDefinition[] Profiles = {
+		new() {
+			Profile = CostumeProfile.Default,
+			LabelTerm = "DefaultLabel",
+			DescriptionTerm = "DefaultDescription",
+		},
+		new() {
+			Profile = CostumeProfile.Scene,
+			LabelTerm = "SceneLabel",
+			DescriptionTerm = "SceneDescription",
+		},
+		new() {
+			Profile = CostumeProfile.Personal,
+			LabelTerm = "PersonalLabel",
+			DescriptionTerm = "PersonalDescription",
+		},
+	};
+
 	public ProfilePanel(CanvasComponent parent, DressCodeControl parentControl) : base(parent, nameof(ProfilePanel)) {
 		_parentControl = parentControl;
 
-		SizeDelta = new(956, 830);
-		Position = new(372, 45);
+		AnchorMin = new(1, 0.5f);
+		AnchorMax = new(1, 0.5f);
+		Pivot = new(1, 0.5f);
+		AnchoredPosition = new(-110, 45);
+		SizeDelta = PanelSize;
 
-		_thumbnailPanel = new ThumbnailPanel(this, "ThumbnailFrame");
+		_thumbnailPanel = new ThumbnailPanel(this, "ThumbnailFrame") {
+			AnchorMin = new(1, 0),
+			AnchorMax = new(1, 1),
+			Pivot = new(1, 0.5f),
+			SizeDelta = new(ThumbnailPanelWidth, 0),
+		};
 
 		_buttonGroup = AddChild("ButtonGroup");
-		_buttonGroup.SizeDelta = new(341, 461);
-		_buttonGroup.Position = new(-307.5001f, 184.5f);
+		_buttonGroup.AnchorMin = new(0, 1);
+		_buttonGroup.AnchorMax = new(1, 1);
+		_buttonGroup.Pivot = new(0, 1);
+		_buttonGroup.OffsetMax = new(-ThumbnailPanelWidth, 0);
 
 		var image = _buttonGroup.AddImage("vr_frame02");
 		image.color = new(0.0471f, 0.0431f, 0.0902f, 0.9412f);
@@ -36,43 +69,34 @@ internal class ProfilePanel : CanvasComponent {
 			}
 		};
 
-		var button1 = new ProfileRadioButton(_buttonGroup, "Default") {
-			Position = new(15, 140),
-			Term = "DefaultLabel",
-			Description = "DefaultDescription",
-		};
-		_toggleGroup.AddButton(button1, CostumeProfile.Default);
+		for (int i = 0; i < Profiles.Length; i++) {
+			var profile = Profiles[i];
+			var button = new ProfileRadioButton(_buttonGroup, profile.Profile.ToString()) {
+				AnchoredPosition = new(15, -(65 + ButtonSpacing * i)),
+				Term = profile.LabelTerm,
+				Description = profile.DescriptionTerm,
+			};
+			_toggleGroup.AddButton(button, profile.Profile);
+		}
 
-		var button2 = new ProfileRadioButton(_buttonGroup, "Scene") {
-			Position = new(15, 25),
-			Term = "SceneLabel",
-			Description = "SceneDescription",
-		};
-		button2.EditClicked += () => CostumeEdit.StartCostumeEdit(_parentControl.SelectedScene);
-		_toggleGroup.AddButton(button2, CostumeProfile.Scene);
-
-		var button3 = new ProfileRadioButton(_buttonGroup, "Personal") {
-			Position = new(15, -90),
-			Term = "PersonalLabel",
-			Description = "PersonalDescription",
-		};
-		button3.EditClicked += () => CostumeEdit.StartCostumeEdit(_parentControl.SelectedMaid, _parentControl.SelectedScene);
-		button3.ShowButton();
-		_toggleGroup.AddButton(button3, CostumeProfile.Personal);
+		_toggleGroup[CostumeProfile.Default].HideEditButton();
+		_toggleGroup[CostumeProfile.Scene].EditClicked += () => CostumeEdit.StartCostumeEdit(_parentControl.SelectedScene);
+		_toggleGroup[CostumeProfile.Personal].EditClicked += () => CostumeEdit.StartCostumeEdit(_parentControl.SelectedMaid, _parentControl.SelectedScene);
 
 		var header = AddChild("Header");
-		header.SizeDelta = new(-30, 32);
 		header.AnchorMin = new(0, 1);
 		header.AnchorMax = new(1, 1);
-		header.Position = new(0, 383);
+		header.Pivot = new(0.5f, 1);
+		header.AnchoredPosition = new(0, -16);
+		header.SizeDelta = new(-30, 32);
 
 		var headerImage = header.AddImage("edit_frame001");
 		headerImage.fillCenter = false;
 
 		var label = new Label(header, "Label") {
-			SizeDelta = new(-20, 0),
 			AnchorMin = Vector2.zero,
 			AnchorMax = Vector2.one,
+			SizeDelta = new(-20, 0),
 			Alignment = TextAnchor.MiddleLeft,
 			Term = "CostumeSetting",
 		};
@@ -85,22 +109,16 @@ internal class ProfilePanel : CanvasComponent {
 	}
 
 	public void SetSceneMode() {
-		_toggleGroup[CostumeProfile.Scene].ShowButton();
+		_toggleGroup[CostumeProfile.Scene].ShowEditButton();
 		_toggleGroup[CostumeProfile.Personal].SetActive(false);
 		_toggleGroup[CostumeProfile.Personal].IsOn = false;
-		_toggleGroup[CostumeProfile.Default].Position = new(15, 140 - (115 / 2));
-		_toggleGroup[CostumeProfile.Scene].Position = new(15, 25 - (115 / 2));
-		_buttonGroup.SizeDelta = new(341, 346);
-		_buttonGroup.Position = new(-307.5001f, 242);
+		_buttonGroup.OffsetMin = new(0, -346);
 	}
 
 	public void SetMaidMode() {
 		_toggleGroup[CostumeProfile.Scene].HideEditButton();
 		_toggleGroup[CostumeProfile.Personal].SetActive(true);
-		_toggleGroup[CostumeProfile.Default].Position = new(15, 140);
-		_toggleGroup[CostumeProfile.Scene].Position = new(15, 25);
-		_buttonGroup.SizeDelta = new(341, 461);
-		_buttonGroup.Position = new(-307.5001f, 184.5f);
+		_buttonGroup.OffsetMin = new(0, -461);
 	}
 
 	public void SelectProfile(CostumeProfile profile) {
@@ -123,5 +141,11 @@ internal class ProfilePanel : CanvasComponent {
 
 	public class ProfileSelectedEventArgs : EventArgs {
 		public CostumeProfile Profile { get; set; }
+	}
+
+	private class ProfileDefinition {
+		public CostumeProfile Profile { get; set; }
+		public string LabelTerm { get; set; }
+		public string DescriptionTerm { get; set; }
 	}
 }

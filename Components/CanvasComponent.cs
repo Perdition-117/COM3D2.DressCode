@@ -1,4 +1,4 @@
-﻿namespace COM3D2.DressCode;
+namespace COM3D2.DressCode;
 
 internal class CanvasComponent : BaseComponent {
 	private readonly RectTransform _transform;
@@ -10,9 +10,19 @@ internal class CanvasComponent : BaseComponent {
 
 	public CanvasComponent(BaseComponent parent, string name) : this(parent.GameObject, name) { }
 
+	public Vector2 AnchoredPosition {
+		get => _transform.anchoredPosition;
+		set => _transform.anchoredPosition = value;
+	}
+
 	public Vector2 SizeDelta {
 		get => _transform.sizeDelta;
 		set => _transform.sizeDelta = value;
+	}
+
+	public Vector2 Pivot {
+		get => _transform.pivot;
+		set => _transform.pivot = value;
 	}
 
 	public Vector2 AnchorMin {
@@ -41,7 +51,7 @@ internal class CanvasComponent : BaseComponent {
 
 	public void SetAllPoints() {
 		SizeDelta = Vector2.zero;
-		AnchorMin = new(0, 0);
-		AnchorMax = new(1, 1);
+		AnchorMin = Vector2.zero;
+		AnchorMax = Vector2.one;
 	}
 }
