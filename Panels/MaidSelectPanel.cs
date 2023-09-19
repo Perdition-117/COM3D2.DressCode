@@ -32,9 +32,7 @@ internal class MaidSelectPanel : GridScrollViewPanel {
 	public void SelectMaid(Maid maid) => _characterSelectManager.SelectMaid(maid);
 
 	private void GetMaidList(List<Maid> drawMaidList) {
-		var characterManager = GameMain.Instance.CharacterMgr;
-		for (var i = 0; i < characterManager.GetStockMaidCount(); i++) {
-			var maid = characterManager.GetStockMaid(i);
+		foreach (var maid in DressCode.GetStockMaids()) {
 			if (!CharacterSelectMain.compatibilityMode || maid.status.isCompatiblePersonality) {
 				drawMaidList.Add(maid);
 			}

@@ -229,28 +229,41 @@ public partial class DressCode : BaseUnityPlugin {
 	}
 
 	internal static Maid GetHeadMaid() {
-		var characterMgr = GameMain.Instance.CharacterMgr;
 		Maid firstMaid = null;
 		Maid firstStockMaid = null;
-		for (var i = 0; i < characterMgr.GetMaidCount(); i++) {
-			var maid = characterMgr.GetMaid(i);
-			if (maid != null) {
-				firstMaid ??= maid;
-				if (maid.status.leader) {
-					return maid;
-				}
+		foreach (var maid in GetMaids()) {
+			firstMaid ??= maid;
+			if (maid.status.leader) {
+				return maid;
 			}
 		}
-		for (var i = 0; i < characterMgr.GetStockMaidCount(); i++) {
-			var maid = characterMgr.GetStockMaid(i);
-			if (maid != null) {
-				firstStockMaid ??= maid;
-				if (maid.status.leader) {
-					return maid;
-				}
+		foreach (var maid in GetStockMaids()) {
+			firstStockMaid ??= maid;
+			if (maid.status.leader) {
+				return maid;
 			}
 		}
 		return firstMaid ?? firstStockMaid;
+	}
+
+	internal static IEnumerable<Maid> GetMaids() {
+		var characterMgr = GameMain.Instance.CharacterMgr;
+		for (var i = 0; i < characterMgr.GetMaidCount(); i++) {
+			var maid = characterMgr.GetMaid(i);
+			if (maid != null) {
+				yield return maid;
+			}
+		}
+	}
+
+	internal static IEnumerable<Maid> GetStockMaids() {
+		var characterMgr = GameMain.Instance.CharacterMgr;
+		for (var i = 0; i < characterMgr.GetStockMaidCount(); i++) {
+			var maid = characterMgr.GetStockMaid(i);
+			if (maid != null) {
+				yield return maid;
+			}
+		}
 	}
 
 	internal static IEnumerator WaitMaidPropBusy(Maid maid, Action callback) {
@@ -357,12 +370,8 @@ public partial class DressCode : BaseUnityPlugin {
 
 		// reset costumes if no scene is active
 		if (_activeCostumeScene == CostumeScene.None) {
-			var numMaids = GameMain.Instance.CharacterMgr.GetMaidCount();
-			for (var i = 0; i < numMaids; i++) {
-				var maid = GameMain.Instance.CharacterMgr.GetMaid(i);
-				if (maid != null && maid.body0) {
-					ResetCostume(maid);
-				}
+			foreach (var maid in GetMaids().Where(e => e.body0)) {
+				ResetCostume(maid);
 			}
 			_originalCostume.Clear();
 			_temporaryCostume.Clear();
@@ -376,16 +385,12 @@ public partial class DressCode : BaseUnityPlugin {
 		}
 
 		if (nextCostumeScene != CostumeScene.None) {
-			var numMaids = GameMain.Instance.CharacterMgr.GetMaidCount();
-			for (var i = 0; i < numMaids; i++) {
-				var maid = GameMain.Instance.CharacterMgr.GetMaid(i);
-				if (maid != null && maid.body0) {
-					// allow honeymoon costume to load properly on startup
-					if (nextCostumeScene == CostumeScene.Honeymoon) {
-						maid.Visible = true;
-					}
-					SetCostume(maid, nextCostumeScene, TemporaryCostumeScenes.Contains(nextCostumeScene));
+			foreach (var maid in GetMaids().Where(e => e.body0)) {
+				// allow honeymoon costume to load properly on startup
+				if (nextCostumeScene == CostumeScene.Honeymoon) {
+					maid.Visible = true;
 				}
+				SetCostume(maid, nextCostumeScene, TemporaryCostumeScenes.Contains(nextCostumeScene));
 			}
 		}
 	}
