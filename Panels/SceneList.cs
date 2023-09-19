@@ -24,7 +24,11 @@ internal class SceneList : ButtonScrollList<CostumeScene> {
 		UpdateChildren();
 	}
 
-	public void SelectFirstAvailable() {
+	public void SelectFirstAvailable(CostumeScene preferredScene = CostumeScene.None) {
+		if (preferredScene != CostumeScene.None && Buttons.First(e => e.Value == preferredScene).IsEnabled) {
+			SelectValue(preferredScene);
+			return;
+		}
 		var button = Buttons.First(e => e.IsEnabled);
 		SelectValue(button.Value);
 	}

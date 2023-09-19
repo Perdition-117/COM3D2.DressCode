@@ -10,6 +10,8 @@ internal class DressCodeControl : MonoBehaviour {
 	private static readonly Vector2 ScopeListSize = new(144, 925);
 	private static readonly Vector2 MaidListSize = new(502, 925);
 
+	private static SelectionState _selectionState;
+
 	private SceneList _sceneList;
 	private ScopeList _scopeList;
 	private MaidSelectPanel _maidSelectPanel;
@@ -17,7 +19,6 @@ internal class DressCodeControl : MonoBehaviour {
 
 	private DressCodeManager m_mgr;
 	private GameObject m_goPanel;
-
 
 	public CostumeScene SelectedScene {
 		get => _sceneList.SelectedValue;
@@ -86,9 +87,19 @@ internal class DressCodeControl : MonoBehaviour {
 	}
 
 	public void CreateSelector() {
-		SelectedScope = ProfileScope.Scene;
+		var previousSelection = _selectionState;
 		_maidSelectPanel.Initialize();
+		if (previousSelection != null) {
+			SelectedScene = previousSelection.Scene;
+			SelectedScope = previousSelection.Scope;
+			SelectedMaid = previousSelection.Maid;
+		} else {
+			SelectedScope = ProfileScope.Scene;
+			_sceneList.SelectFirstAvailable();
+		}
 	}
+
+	internal void ResetSelections() => _selectionState = null;
 
 	private void SetSceneMode() {
 		_maidSelectPanel.SetActive(false);
@@ -114,11 +125,16 @@ internal class DressCodeControl : MonoBehaviour {
 
 	private void UpdateMaidSelection() {
 		_sceneList.SetNpcMode(SelectedScope == ProfileScope.Maid && SelectedMaid.status.heroineType is not (MaidStatus.HeroineType.Original or MaidStatus.HeroineType.Transfer));
-		_sceneList.SelectFirstAvailable();
+		_sceneList.SelectFirstAvailable(SelectedScene);
 		UpdateProfileSelection();
 	}
 
 	private void UpdateProfileSelection() {
+		_selectionState = new() {
+			Scene = SelectedScene,
+			Scope = SelectedScope,
+			Maid = SelectedMaid,
+		};
 		var profile = SelectedScope switch {
 			ProfileScope.Scene => DressCode.GetPreferredProfile(SelectedScene),
 			ProfileScope.Maid => DressCode.GetPreferredProfile(SelectedMaid, SelectedScene),
@@ -147,5 +163,11 @@ internal class DressCodeControl : MonoBehaviour {
 				}
 			}
 		}
+	}
+
+	class SelectionState {
+		public CostumeScene Scene { get; set; }
+		public ProfileScope Scope { get; set; }
+		public Maid Maid { get; set; }
 	}
 }

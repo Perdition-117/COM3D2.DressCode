@@ -528,11 +528,11 @@ public partial class DressCode : BaseUnityPlugin {
 	private static void BasePanelMgr_BeforeFadeIn(BasePanelMgr __instance) {
 		if (__instance is DailyMgr dailyMgr && ReopenPanel) {
 			ReopenPanel = false;
-			Open(dailyMgr);
+			Open(dailyMgr, true);
 		}
 	}
 
-	private static void Open(DailyMgr dailyMgr) {
+	private static void Open(DailyMgr dailyMgr, bool retainSelections = false) {
 		var maid = PrivateModeMgr.Instance.PrivateMaid;
 		if (maid != null) {
 			maid.Visible = false;
@@ -540,6 +540,9 @@ public partial class DressCode : BaseUnityPlugin {
 		dailyMgr.m_ctrl.m_goPanel.gameObject.SetActive(false);
 		var manager = dailyMgr.GetManager<DressCodeManager>();
 		manager.SetBackground();
+		if (!retainSelections) {
+			manager.ResetSelections();
+		}
 		manager.OpenPanel();
 	}
 }

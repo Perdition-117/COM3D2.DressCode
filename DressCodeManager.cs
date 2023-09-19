@@ -1,4 +1,4 @@
-﻿using com.workman.cm3d2.scene.dailyEtc;
+using com.workman.cm3d2.scene.dailyEtc;
 using PrivateMaidMode;
 
 namespace COM3D2.DressCode;
@@ -27,6 +27,8 @@ public class DressCodeManager : BaseCreatePanel {
 		m_goPanel.SetActive(true);
 		m_Ctrl.CreateSelector();
 	}
+
+	internal void ResetSelections() => m_Ctrl.ResetSelections();
 
 	internal void SetBackground() {
 		GameMain.Instance.MainCamera.Reset(CameraMain.CameraType.Target, true);
