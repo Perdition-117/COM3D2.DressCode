@@ -496,6 +496,9 @@ public partial class DressCode : BaseUnityPlugin {
 	[HarmonyPatch(typeof(DailyCtrl), nameof(DailyCtrl.Init))]
 	[HarmonyPostfix]
 	private static void DailyCtrl_OnInit(DailyCtrl __instance) {
+		// do not create button in CM3D2 management as return scripts do not work
+		if (DailyMgr.IsLegacy) return;
+
 		var panel = GameObject.Find("/UI Root/DailyPanel");
 		var menu = panel.transform.Find("OfficeMenu")?.gameObject;
 		if (menu == null) {
