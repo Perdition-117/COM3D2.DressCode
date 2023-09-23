@@ -8,7 +8,7 @@ Automatically switches costume per scene. Currently supports the following scene
 - Private mode
 - Honeymoon
 
-![interface](https://user-images.githubusercontent.com/87424475/170797407-5be8ebc9-f898-4672-a04a-0507af3fbe50.png)
+![interface](https://github.com/Perdition-117/COM3D2.DressCode/assets/87424475/3654fdb4-9005-4a40-8c1e-c13fba093d3e)
 
 ## Usage
 
