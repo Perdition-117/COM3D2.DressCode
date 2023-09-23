@@ -27,6 +27,7 @@ public partial class DressCode : BaseUnityPlugin {
 	private static readonly PluginLocalization _localization = new(PluginInfo.PLUGIN_NAME);
 	private static readonly Dictionary<string, List<MaidProp>> _originalCostume = new();
 	private static readonly Dictionary<string, Configuration.Costume> _temporaryCostume = new();
+	private static string _currentSceneName = string.Empty;
 	private static CostumeScene _activeCostumeScene;
 	private static bool _isReloadingCostume = false;
 
@@ -43,7 +44,7 @@ public partial class DressCode : BaseUnityPlugin {
 	internal static bool ReopenPanel { get; set; } = false;
 
 	private void Awake() {
-		SceneManager.sceneUnloaded += OnSceneUnloaded;
+		SceneManager.sceneLoaded += OnSceneLoaded;
 
 		_logger = Logger;
 
@@ -292,9 +293,10 @@ public partial class DressCode : BaseUnityPlugin {
 		return costumeScene;
 	}
 
-	private static void OnSceneUnloaded(Scene scene) {
-		var prevSceneName = scene.name;
-		var nextSceneName = GameMain.Instance.GetNowSceneName();
+	private static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+		var prevSceneName = _currentSceneName;
+		var nextSceneName = scene.name;
+		_currentSceneName = nextSceneName;
 		var nextCostumeScene = GetCostumeScene(nextSceneName);
 
 		// do not load costumes when entering or leaving edit mode while in a dress code scene
