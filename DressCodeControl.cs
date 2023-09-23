@@ -87,7 +87,7 @@ internal class DressCodeControl : MonoBehaviour {
 					if (_privateModeProfile != newProfile) {
 						DressCode.ResetCostume(privateMaid);
 						privateMaid.AllProcPropSeqStart();
-						if (DressCode.TryGetEffectiveCostume(privateMaid, CostumeScene.PrivateMode, out var costume)) {
+						if (DressCode.HasEffectiveCostume(privateMaid, CostumeScene.PrivateMode)) {
 							DressCode.SetCostume(privateMaid, CostumeScene.PrivateMode, true);
 						}
 					}

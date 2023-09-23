@@ -82,6 +82,10 @@ public partial class DressCode : BaseUnityPlugin {
 		return _config.TryGetSceneProfile(scene, out profile);
 	}
 
+	internal static bool HasEffectiveCostume(Maid maid, CostumeScene scene) {
+		return TryGetEffectiveCostume(maid, scene, out _);
+	}
+
 	internal static bool TryGetEffectiveCostume(Maid maid, CostumeScene scene, out Configuration.Costume costume) {
 		var hasMaidProfile = _config.TryGetMaidProfile(maid, scene, out var maidProfile);
 		var hasSceneProfile = _config.TryGetSceneProfile(scene, out var sceneProfile);
@@ -338,7 +342,7 @@ public partial class DressCode : BaseUnityPlugin {
 			if (nextCostumeScene == CostumeScene.Yotogi) {
 				LogDebug("Honeymoon yotogi started.");
 				var maid = HoneymoonManager.Instance.targetMaid;
-				if (TryGetEffectiveCostume(maid, CostumeScene.Honeymoon, out var costume)) {
+				if (HasEffectiveCostume(maid, CostumeScene.Honeymoon)) {
 					RemoveTemporaryCostume(maid);
 					SetCostume(maid, CostumeScene.Honeymoon);
 				}

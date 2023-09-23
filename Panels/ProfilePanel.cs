@@ -62,10 +62,10 @@ internal class ProfilePanel : CanvasComponent {
 			_toggleGroup[e.Value].EditIsEnabled = e.IsSelected;
 			if (e.IsSelected) {
 				_selectedProfile = e.Value;
-				UpdateThumbnail();
 				if (!_noEventTrigger) {
 					OnProfileSelected(new() { Profile = e.Value });
 				}
+				UpdateThumbnail();
 			}
 		};
 
@@ -131,10 +131,17 @@ internal class ProfilePanel : CanvasComponent {
 	}
 
 	private void UpdateThumbnail() {
-		_thumbnailPanel.ThumbnailImage = _selectedProfile switch {
-			CostumeProfile.Default => (_parentControl.SelectedScope == ProfileScope.Maid ? _parentControl.SelectedMaid : DressCode.GetHeadMaid()).GetThumCard(),
-			CostumeProfile.Scene => DressCode.GetThumbnail(_parentControl.SelectedScene, null),
-			CostumeProfile.Personal => DressCode.GetThumbnail(_parentControl.SelectedScene, _parentControl.SelectedMaid),
+		var selectedMaid = _parentControl.SelectedMaid;
+		var selectedScene = _parentControl.SelectedScene;
+		var effectiveProfile = _selectedProfile;
+		// fall back to default thumbnail if selected profile has no costume defined
+		if (effectiveProfile != CostumeProfile.Default && !DressCode.HasEffectiveCostume(selectedMaid, selectedScene)) {
+			effectiveProfile = CostumeProfile.Default;
+		}
+		_thumbnailPanel.ThumbnailImage = effectiveProfile switch {
+			CostumeProfile.Default => (_parentControl.SelectedScope == ProfileScope.Maid ? selectedMaid : DressCode.GetHeadMaid()).GetThumCard(),
+			CostumeProfile.Scene => DressCode.GetThumbnail(selectedScene, null),
+			CostumeProfile.Personal => DressCode.GetThumbnail(selectedScene, selectedMaid),
 			_ => throw new NotImplementedException(),
 		};
 	}
