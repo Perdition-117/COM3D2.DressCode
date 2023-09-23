@@ -12,6 +12,8 @@ internal class DressCodeControl : MonoBehaviour {
 
 	private static SelectionState _selectionState;
 
+	private CostumeProfile? _privateModeProfile;
+
 	private SceneList _sceneList;
 	private ScopeList _scopeList;
 	private MaidSelectPanel _maidSelectPanel;
@@ -76,9 +78,19 @@ internal class DressCodeControl : MonoBehaviour {
 				var dailyManager = manager.GetManager<DailyMgr>();
 				dailyManager.m_goPanel.SetActive(true);
 
-				var maid = PrivateModeMgr.Instance.PrivateMaid;
-				if (maid != null) {
-					maid.Visible = true;
+				var privateMaid = PrivateModeMgr.Instance.PrivateMaid;
+				if (privateMaid != null) {
+					privateMaid.Visible = true;
+
+					// update private maid costume if necessary
+					var newProfile = DressCode.GetPreferredProfile(privateMaid, CostumeScene.PrivateMode);
+					if (_privateModeProfile != newProfile) {
+						DressCode.ResetCostume(privateMaid);
+						privateMaid.AllProcPropSeqStart();
+						if (DressCode.TryGetEffectiveCostume(privateMaid, CostumeScene.PrivateMode, out var costume)) {
+							DressCode.SetCostume(privateMaid, CostumeScene.PrivateMode, true);
+						}
+					}
 				}
 				manager.ResetBackground();
 				GameMain.Instance.MainCamera.FadeIn();
@@ -87,6 +99,8 @@ internal class DressCodeControl : MonoBehaviour {
 	}
 
 	public void CreateSelector() {
+		var privateMaid = PrivateModeMgr.Instance.PrivateMaid;
+		_privateModeProfile = privateMaid != null ? DressCode.GetPreferredProfile(privateMaid, CostumeScene.PrivateMode) : null;
 		var previousSelection = _selectionState;
 		_maidSelectPanel.Initialize();
 		if (previousSelection != null) {
@@ -144,24 +158,10 @@ internal class DressCodeControl : MonoBehaviour {
 	}
 
 	private void OnProfileChanged(object sender, ProfilePanel.ProfileSelectedEventArgs e) {
-		var privateMaid = PrivateModeMgr.Instance.PrivateMaid;
-		CostumeProfile? currentProfile = privateMaid != null ? DressCode.GetPreferredProfile(privateMaid, SelectedScene) : null;
 		if (SelectedScope == ProfileScope.Scene) {
 			ConfigurationManager.Configuration.SetPreferredProfile(SelectedScene, e.Profile);
 		} else {
 			ConfigurationManager.Configuration.SetPreferredProfile(SelectedMaid, SelectedScene, e.Profile);
-		}
-		// update private maid costume immediately if necessary
-		if (SelectedScene == CostumeScene.PrivateMode && privateMaid != null) {
-			var newProfile = DressCode.GetPreferredProfile(privateMaid, SelectedScene);
-			if (currentProfile != newProfile) {
-				if (DressCode.TryGetEffectiveCostume(privateMaid, CostumeScene.PrivateMode, out var costume)) {
-					DressCode.LoadCostume(privateMaid, costume, false, true);
-					DressCode.SetTemporaryCostume(privateMaid, costume);
-				} else {
-					DressCode.ResetCostume(privateMaid);
-				}
-			}
 		}
 	}
 

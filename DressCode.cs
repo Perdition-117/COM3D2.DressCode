@@ -138,7 +138,7 @@ public partial class DressCode : BaseUnityPlugin {
 		}
 	}
 
-	private static void SetCostume(Maid maid, CostumeScene scene, bool isTemporary = false) {
+	internal static void SetCostume(Maid maid, CostumeScene scene, bool isTemporary = false) {
 		if (!isTemporary && _originalCostume.ContainsKey(maid.status.guid)) {
 			return;
 		}
