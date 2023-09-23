@@ -299,12 +299,9 @@ public partial class DressCode : BaseUnityPlugin {
 		_currentSceneName = nextSceneName;
 		var nextCostumeScene = GetCostumeScene(nextSceneName);
 
-		// do not load costumes when entering or leaving edit mode while in a dress code scene
+		// prevent resetting costumes when entering edit mode while in a dress code scene
 		if (nextSceneName == SceneName.Edit && (CostumeEdit.KeepCostume || PrivateModeMgr.Instance.PrivateMaid)) return;
-		if (prevSceneName == SceneName.Edit && CostumeEdit.KeepCostume) {
-			CostumeEdit.KeepCostume = false;
-			return;
-		}
+		CostumeEdit.KeepCostume = false;
 
 		// reload private mode costume between private mode events
 		if (_activeCostumeScene == CostumeScene.PrivateMode && nextSceneName == SceneName.PrivateModeEvent) {

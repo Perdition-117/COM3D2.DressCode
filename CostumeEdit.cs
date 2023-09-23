@@ -94,6 +94,20 @@ internal class CostumeEdit {
 		});
 	}
 
+	private static bool StartCostumeEdit(Maid maid, CostumeScene scene, string scriptFile, string label) {
+		var profile = DressCode.GetPreferredProfile(maid, scene);
+		if (profile == CostumeProfile.Default) {
+			return true;
+		}
+		_currentScript = scriptFile;
+		GameMain.Instance.MainCamera.FadeOut(0.5f, false, () => {
+			KeepCostume = true;
+			StartCostumeEdit(maid, scene, profile, label);
+		});
+
+		return false;
+	}
+
 	private static void StartCostumeEdit(Maid maid, CostumeScene scene, CostumeProfile profile, string label, bool reopenPanel = false) {
 		_currentScene = scene;
 		DressCode.LogDebug($"Starting scene edit for {scene} ({profile})...");
@@ -294,38 +308,14 @@ internal class CostumeEdit {
 	[HarmonyPatch(typeof(YotogiSkillSelectManager), nameof(YotogiSkillSelectManager.OnClickEdit))]
 	[HarmonyPrefix]
 	private static bool YotogiSkillSelectManager_OnClickEdit(YotogiSkillSelectManager __instance) {
-		var maid = __instance.maid_;
-		var scene = CostumeScene.Yotogi;
-		var profile = DressCode.GetPreferredProfile(maid, scene);
-		if (profile == CostumeProfile.Default) {
-			return true;
-		}
-		_currentScript = "YotogiMain.ks";
-		GameMain.Instance.MainCamera.FadeOut(0.5f, false, () => {
-			KeepCostume = true;
-			StartCostumeEdit(maid, scene, profile, "*edeit_end");
-		});
-
-		return false;
+		return StartCostumeEdit(__instance.maid_, CostumeScene.Yotogi, "YotogiMain.ks", "*edeit_end");
 	}
 
 	// load honeymoon costume when launching edit mode from honeymoon
 	[HarmonyPatch(typeof(SceneHoneymoonModeMain), nameof(SceneHoneymoonModeMain.OnClickMaidEdit))]
 	[HarmonyPrefix]
 	private static bool SceneHoneymoonModeMain_OnClickMaidEdit(SceneHoneymoonModeMain __instance) {
-		var maid = __instance.manager.targetMaid;
-		var scene = CostumeScene.Honeymoon;
-		var profile = DressCode.GetPreferredProfile(maid, scene);
-		if (profile == CostumeProfile.Default) {
-			return true;
-		}
-		_currentScript = "HoneymoonModeMain.ks";
-		GameMain.Instance.MainCamera.FadeOut(0.5f, false, () => {
-			KeepCostume = true;
-			StartCostumeEdit(maid, scene, profile, "*メイン画面");
-		});
-
-		return false;
+		return StartCostumeEdit(__instance.manager.targetMaid, CostumeScene.Honeymoon, "HoneymoonModeMain.ks", "*メイン画面");
 	}
 
 	// enable preset save buttons
