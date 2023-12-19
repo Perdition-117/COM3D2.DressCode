@@ -7,4 +7,5 @@ public enum CostumeScene {
 	Yotogi,
 	PrivateMode,
 	Honeymoon,
+	YotogiTalk,
 }

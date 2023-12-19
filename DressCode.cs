@@ -410,13 +410,23 @@ public partial class DressCode : BaseUnityPlugin {
 		}
 	}
 
+	// use character selection menu as trigger for certain scenes
 	[HarmonyPatch(typeof(CharacterSelectMain), nameof(CharacterSelectMain.OnFinish))]
 	[HarmonyPostfix]
 	private static void CharacterSelectMain_OnFinish(CharacterSelectMain __instance) {
-		// honeymoon scene starts on initial character selection
-		if (__instance.scene_chara_select_.select_type == SceneCharacterSelect.SelectType.HoneymoonMode && __instance.select_maid_ != null && _activeCostumeScene != CostumeScene.Honeymoon) {
+		if (__instance.select_maid_ == null) {
+			return;
+		}
+
+		switch (__instance.scene_chara_select_.select_type) {
+			case SceneCharacterSelect.SelectType.Yotogi:
+				_activeCostumeScene = CostumeScene.YotogiTalk;
+				LogDebug($"{_activeCostumeScene} scene started.");
+				SetCostume(__instance.select_maid_, CostumeScene.YotogiTalk, true);
+				break;
+			case SceneCharacterSelect.SelectType.HoneymoonMode:
+				if (_activeCostumeScene != CostumeScene.Honeymoon) {
 			_activeCostumeScene = CostumeScene.Honeymoon;
-			if (PersistentCostumeScenes.Contains(_activeCostumeScene)) {
 				LogDebug($"{_activeCostumeScene} scene started.");
 				foreach (var mpn in CostumeEdit.CostumeMpn) {
 					var prop = __instance.select_maid_.GetProp(mpn);
@@ -424,6 +434,7 @@ public partial class DressCode : BaseUnityPlugin {
 				}
 				SetCostume(__instance.select_maid_, CostumeScene.Honeymoon, true);
 			}
+				break;
 		}
 	}
 

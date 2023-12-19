@@ -10,6 +10,7 @@ internal class SceneList : ButtonScrollList<CostumeScene> {
 		new("SceneDance", CostumeScene.Dance),
 		new("ScenePoleDance", CostumeScene.PoleDance),
 		new("SceneYotogi", CostumeScene.Yotogi),
+		new("SceneYotogiTalk", CostumeScene.YotogiTalk),
 		new("ScenePrivateMode", CostumeScene.PrivateMode),
 		new("SceneHoneymoon", CostumeScene.Honeymoon),
 	};
