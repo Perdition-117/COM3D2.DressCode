@@ -53,6 +53,7 @@ public partial class DressCode : BaseUnityPlugin {
 
 		Harmony.CreateAndPatchAll(typeof(DressCode));
 		Harmony.CreateAndPatchAll(typeof(CostumeEdit));
+		Harmony.CreateAndPatchAll(typeof(CharacterSelectThumbnail));
 	}
 
 	internal static void LogDebug(object data) {
@@ -63,11 +64,15 @@ public partial class DressCode : BaseUnityPlugin {
 
 	internal static Texture2D GetThumbnail(CostumeScene scene, Maid maid) {
 		Texture2D result = null;
-		var thumbnailPath = Path.Combine(Maid.ThumbnailDictionary, DressCode.GetThumbnailFileName(maid, scene));
+		var thumbnailPath = GetThumbnailPath(maid, scene);
 		if (File.Exists(thumbnailPath)) {
 			result = UTY.LoadTexture(thumbnailPath);
 		}
 		return result;
+	}
+
+	internal static string GetThumbnailPath(Maid maid, CostumeScene scene) {
+		return Path.Combine(Maid.ThumbnailDictionary, GetThumbnailFileName(maid, scene));
 	}
 
 	internal static string GetThumbnailFileName(Maid maid, CostumeScene scene) {
