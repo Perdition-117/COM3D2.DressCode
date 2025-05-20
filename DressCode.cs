@@ -12,7 +12,6 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.DressCode;
 
-// TODO Hair (?)
 // TODO CharacterSelect thumbnail
 
 [BepInPlugin("net.perdition.com3d2.dresscode", PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
@@ -39,6 +38,7 @@ public partial class DressCode : BaseUnityPlugin {
 	private static readonly CostumeScene[] PersistentCostumeScenes = {
 		CostumeScene.PrivateMode,
 		CostumeScene.Honeymoon,
+		CostumeScene.NightPool,
 	};
 
 	internal static bool ReopenPanel { get; set; } = false;
@@ -171,6 +171,9 @@ public partial class DressCode : BaseUnityPlugin {
 		_temporaryCostume.Add(maid.status.guid, costume);
 	}
 
+	/// <summary>
+	/// Stores a maid's current persistent costume.
+	/// </summary>
 	private static void BackupCostume(Maid maid) {
 		LogDebug($"Backing up costume for {maid.name}...");
 
@@ -202,6 +205,9 @@ public partial class DressCode : BaseUnityPlugin {
 		}
 	}
 
+	/// <summary>
+	/// Restores a maid's persistent costume previously backed up using <see cref="BackupCostume"/>.
+	/// </summary>
 	private static void RestoreCostume(Maid maid) {
 		LogDebug($"Restoring costume for {maid.name}...");
 
@@ -292,6 +298,8 @@ public partial class DressCode : BaseUnityPlugin {
 			costumeScene = CostumeScene.PrivateMode;
 		} else if (sceneName == SceneName.Honeymoon) {
 			costumeScene = CostumeScene.Honeymoon;
+		} else if (sceneName == SceneName.NightPool) {
+			costumeScene = CostumeScene.NightPool;
 		} else if (sceneName.StartsWith("SceneDance") && DanceMain.SelectDanceData != null) {
 			if (DanceMain.SelectDanceData.RhythmGameCorrespond) {
 				costumeScene = CostumeScene.Dance;
@@ -321,6 +329,11 @@ public partial class DressCode : BaseUnityPlugin {
 				LoadCostume(maid, costume, false, true);
 				_isReloadingCostume = false;
 			}
+			return;
+		}
+
+		// keep night pool costume for night pool yotogi
+		if (_activeCostumeScene == CostumeScene.NightPool && nextCostumeScene == CostumeScene.Yotogi) {
 			return;
 		}
 
@@ -431,14 +444,14 @@ public partial class DressCode : BaseUnityPlugin {
 				break;
 			case SceneCharacterSelect.SelectType.HoneymoonMode:
 				if (_activeCostumeScene != CostumeScene.Honeymoon) {
-			_activeCostumeScene = CostumeScene.Honeymoon;
-				LogDebug($"{_activeCostumeScene} scene started.");
-				foreach (var mpn in CostumeEdit.CostumeMpn) {
-					var prop = __instance.select_maid_.GetProp(mpn);
-					__instance.select_maid_.ResetProp(prop);
+					_activeCostumeScene = CostumeScene.Honeymoon;
+					LogDebug($"{_activeCostumeScene} scene started.");
+					foreach (var mpn in CostumeEdit.CostumeMpn) {
+						var prop = __instance.select_maid_.GetProp(mpn);
+						__instance.select_maid_.ResetProp(prop);
+					}
+					SetCostume(__instance.select_maid_, CostumeScene.Honeymoon, true);
 				}
-				SetCostume(__instance.select_maid_, CostumeScene.Honeymoon, true);
-			}
 				break;
 		}
 	}

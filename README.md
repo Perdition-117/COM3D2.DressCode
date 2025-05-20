@@ -7,8 +7,13 @@ Automatically switches costume per scene. Currently supports the following scene
 - Yotogi
 - Private mode
 - Honeymoon
+- Night pool (see [limitations](#limitations))
 
 ![interface](https://github.com/Perdition-117/COM3D2.DressCode/assets/87424475/3654fdb4-9005-4a40-8c1e-c13fba093d3e)
+
+## Installing
+
+Get the latest version from [the release page](../../releases/latest). Extract the archive contents into `BepInEx`.
 
 ## Usage
 
@@ -30,6 +35,6 @@ If a costume has not been created for the configured setting, Default behaviour 
 
 DressCode generates thumbnails prefixed `dresscode_` in the `Thumb` directory when a costume is saved. These may safely be deleted and will be regenerated the next time a costume is saved.
 
-## Installing
+## Limitations
 
-Get the latest version from [the release page](../../releases/latest). Extract the archive contents into the `BepInEx` directory.
+Night pool outfit is only applied once the actual mini game starts, and will not be applied to the yotogi scene if the mini game is skipped.

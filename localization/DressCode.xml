@@ -12,6 +12,7 @@
 		<Term Key="SceneYotogiTalk" Translation="Yotogi (talk)" />
 		<Term Key="ScenePrivateMode" Translation="Private mode" />
 		<Term Key="SceneHoneymoon" Translation="Honeymoon" />
+		<Term Key="SceneNightPool" Translation="Night pool" />
 		
 		<Term Key="CostumeSetting" Translation="Costume setting" />
 		
@@ -34,6 +35,7 @@
 		<Term Key="SceneYotogiTalk" Translation="夜伽（会話する）" />
 		<Term Key="ScenePrivateMode" Translation="プライベートモード" />
 		<Term Key="SceneHoneymoon" Translation="ハネムーン" />
+		<Term Key="SceneNightPool" Translation="ナイトプール" />
 		
 		<Term Key="CostumeSetting" Translation="コスチューム設定" />
 		

@@ -8,4 +8,5 @@ public enum CostumeScene {
 	PrivateMode,
 	Honeymoon,
 	YotogiTalk,
+	NightPool,
 }

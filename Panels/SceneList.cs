@@ -4,6 +4,7 @@ internal class SceneList : ButtonScrollList<CostumeScene> {
 	private static readonly CostumeScene[] NpcScenes = {
 		CostumeScene.Dance,
 		CostumeScene.PoleDance,
+		CostumeScene.NightPool,
 	};
 
 	private static readonly KeyValuePair<string, CostumeScene>[] Scenes = {
@@ -13,6 +14,7 @@ internal class SceneList : ButtonScrollList<CostumeScene> {
 		new("SceneYotogiTalk", CostumeScene.YotogiTalk),
 		new("ScenePrivateMode", CostumeScene.PrivateMode),
 		new("SceneHoneymoon", CostumeScene.Honeymoon),
+		new("SceneNightPool", CostumeScene.NightPool),
 	};
 
 	public SceneList(BaseComponent parent) : base(parent, nameof(SceneList)) {
