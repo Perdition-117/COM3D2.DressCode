@@ -61,6 +61,7 @@ internal class ButtonScrollList<T> : GridScrollViewPanel {
 		label.SetAnchor(button, ButtonLabelInset, ButtonLabelOffset);
 		label.spacingX = 0;
 		label.maxLineCount = 1;
+		label.text = term;
 
 		var localize = label.GetComponent<Localize>();
 		localize.Term = DressCode.GetTermKey(term);
