@@ -1,0 +1,56 @@
+namespace COM3D2.DressCode;
+
+internal static class Mpn {
+	public static readonly MPN BodyStart = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "BODY_START");
+	public static readonly MPN BodyEnd = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "BODY_END");
+	public static readonly MPN BodyReloadStart = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "BODY_RELOAD_START");
+	public static readonly MPN BodyReloadEnd = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "BODY_RELOAD_END");
+	public static readonly MPN WearStart = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "WEAR_START");
+	public static readonly MPN WearEnd = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "WEAR_END");
+	public static readonly MPN SetStart = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "SET_START");
+	public static readonly MPN SetEnd = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "SET_END");
+	public static readonly MPN FolderBodyStart = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "FOLDER_BODY_START");
+	public static readonly MPN FolderBodyEnd = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "FOLDER_BODY_END");
+	public static readonly MPN Max = (MPN)Enum.Parse(typeof(MPN_TYPE_RANGE), "MAX");
+
+	public static readonly MPN null_mpn = (MPN)Enum.Parse(typeof(MPN), "null_mpn");
+	public static readonly MPN body = (MPN)Enum.Parse(typeof(MPN), "body");
+	public static readonly MPN hairf = (MPN)Enum.Parse(typeof(MPN), "hairf");
+	public static readonly MPN hairr = (MPN)Enum.Parse(typeof(MPN), "hairr");
+	public static readonly MPN hairt = (MPN)Enum.Parse(typeof(MPN), "hairt");
+	public static readonly MPN hairs = (MPN)Enum.Parse(typeof(MPN), "hairs");
+	public static readonly MPN hairaho = (MPN)Enum.Parse(typeof(MPN), "hairaho");
+	public static readonly MPN wear = (MPN)Enum.Parse(typeof(MPN), "wear");
+	public static readonly MPN skirt = (MPN)Enum.Parse(typeof(MPN), "skirt");
+	public static readonly MPN mizugi = (MPN)Enum.Parse(typeof(MPN), "mizugi");
+	public static readonly MPN bra = (MPN)Enum.Parse(typeof(MPN), "bra");
+	public static readonly MPN panz = (MPN)Enum.Parse(typeof(MPN), "panz");
+	public static readonly MPN stkg = (MPN)Enum.Parse(typeof(MPN), "stkg");
+	public static readonly MPN shoes = (MPN)Enum.Parse(typeof(MPN), "shoes");
+	public static readonly MPN headset = (MPN)Enum.Parse(typeof(MPN), "headset");
+	public static readonly MPN glove = (MPN)Enum.Parse(typeof(MPN), "glove");
+	public static readonly MPN acchead = (MPN)Enum.Parse(typeof(MPN), "acchead");
+	public static readonly MPN accha = (MPN)Enum.Parse(typeof(MPN), "accha");
+	public static readonly MPN acchana = (MPN)Enum.Parse(typeof(MPN), "acchana");
+	public static readonly MPN acckamisub = (MPN)Enum.Parse(typeof(MPN), "acckamisub");
+	public static readonly MPN acckami = (MPN)Enum.Parse(typeof(MPN), "acckami");
+	public static readonly MPN accmimi = (MPN)Enum.Parse(typeof(MPN), "accmimi");
+	public static readonly MPN accnip = (MPN)Enum.Parse(typeof(MPN), "accnip");
+	public static readonly MPN acckubi = (MPN)Enum.Parse(typeof(MPN), "acckubi");
+	public static readonly MPN acckubiwa = (MPN)Enum.Parse(typeof(MPN), "acckubiwa");
+	public static readonly MPN accheso = (MPN)Enum.Parse(typeof(MPN), "accheso");
+	public static readonly MPN accude = (MPN)Enum.Parse(typeof(MPN), "accude");
+	public static readonly MPN accashi = (MPN)Enum.Parse(typeof(MPN), "accashi");
+	public static readonly MPN accsenaka = (MPN)Enum.Parse(typeof(MPN), "accsenaka");
+	public static readonly MPN accshippo = (MPN)Enum.Parse(typeof(MPN), "accshippo");
+	public static readonly MPN accanl = (MPN)Enum.Parse(typeof(MPN), "accanl");
+	public static readonly MPN accvag = (MPN)Enum.Parse(typeof(MPN), "accvag");
+	public static readonly MPN megane = (MPN)Enum.Parse(typeof(MPN), "megane");
+	public static readonly MPN accxxx = (MPN)Enum.Parse(typeof(MPN), "accxxx");
+	public static readonly MPN handitem = (MPN)Enum.Parse(typeof(MPN), "handitem");
+	public static readonly MPN acchat = (MPN)Enum.Parse(typeof(MPN), "acchat");
+	public static readonly MPN onepiece = (MPN)Enum.Parse(typeof(MPN), "onepiece");
+	public static readonly MPN set_maidwear = (MPN)Enum.Parse(typeof(MPN), "set_maidwear");
+	public static readonly MPN set_mywear = (MPN)Enum.Parse(typeof(MPN), "set_mywear");
+	public static readonly MPN set_underwear = (MPN)Enum.Parse(typeof(MPN), "set_underwear");
+}

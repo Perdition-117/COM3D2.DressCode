@@ -1,4 +1,4 @@
-﻿using UnityEngine.Events;
+using UnityEngine.Events;
 
 namespace COM3D2.DressCode;
 
@@ -6,7 +6,7 @@ internal class RadioButton : CanvasComponent {
 	private readonly Toggle _toggle;
 	private readonly Label _label;
 
-	private readonly ColorBlock _colors = new() {
+	private static readonly ColorBlock ButtonColors = new() {
 		normalColor = new(0.7843f, 0.7843f, 0.7843f, 1),
 		highlightedColor = new(1, 1, 1, 1),
 		pressedColor = new(0.7843f, 0.7843f, 0.7843f, 1),
@@ -15,9 +15,18 @@ internal class RadioButton : CanvasComponent {
 		fadeDuration = 0.1f,
 	};
 
+	static RadioButton() {
+		if (DressCode.GameVersion.Major >= 3) {
+			var propertyInfo = typeof(ColorBlock).GetProperty("selectedColor");
+			object colors = ButtonColors;
+			propertyInfo.SetValue(colors, Color.white, null);
+			ButtonColors = (ColorBlock)colors;
+		}
+	}
+
 	public RadioButton(CanvasComponent parent, string name) : base(parent, name) {
 		_toggle = AddComponent<Toggle>();
-		_toggle.colors = _colors;
+		_toggle.colors = ButtonColors;
 
 		AddComponent<uGUISelectableSound>();
 

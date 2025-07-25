@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Reflection.Emit;
 using com.workman.cm3d2.scene.dailyEtc;
 using HarmonyLib;
 using Honeymoon;
@@ -17,49 +18,49 @@ internal class CostumeEdit {
 
 	// MPNs to be saved and loaded for costumes
 	internal static readonly HashSet<MPN> CostumeMpn = new() {
-		//MPN.hairf,
-		//MPN.hairr,
-		//MPN.hairt,
-		//MPN.hairs,
-		//MPN.hairaho,
+		//Mpn.hairf,
+		//Mpn.hairr,
+		//Mpn.hairt,
+		//Mpn.hairs,
+		//Mpn.hairaho,
 
-		MPN.wear,
-		MPN.skirt,
-		MPN.mizugi,
-		MPN.bra,
-		MPN.panz,
-		MPN.stkg,
-		MPN.shoes,
-		MPN.onepiece,
+		Mpn.wear,
+		Mpn.skirt,
+		Mpn.mizugi,
+		Mpn.bra,
+		Mpn.panz,
+		Mpn.stkg,
+		Mpn.shoes,
+		Mpn.onepiece,
 
-		MPN.headset,
-		MPN.glove,
-		MPN.acchead,
-		MPN.acchana,
-		MPN.acckamisub,
-		MPN.acckami,
-		MPN.accmimi,
-		MPN.accnip,
-		MPN.acckubi,
-		MPN.acckubiwa,
-		MPN.accheso,
-		MPN.accude,
-		MPN.accashi,
-		MPN.accsenaka,
-		MPN.accshippo,
-		MPN.accanl,
-		MPN.accvag,
-		MPN.megane,
-		MPN.accxxx,
-		MPN.handitem,
-		MPN.acchat,
+		Mpn.headset,
+		Mpn.glove,
+		Mpn.acchead,
+		Mpn.acchana,
+		Mpn.acckamisub,
+		Mpn.acckami,
+		Mpn.accmimi,
+		Mpn.accnip,
+		Mpn.acckubi,
+		Mpn.acckubiwa,
+		Mpn.accheso,
+		Mpn.accude,
+		Mpn.accashi,
+		Mpn.accsenaka,
+		Mpn.accshippo,
+		Mpn.accanl,
+		Mpn.accvag,
+		Mpn.megane,
+		Mpn.accxxx,
+		Mpn.handitem,
+		Mpn.acchat,
 	};
 
 	// additional MPNs to be enabled in edit mode
 	internal static readonly HashSet<MPN> EnabledMpn = new(CostumeMpn.Concat(new[] {
-		MPN.set_maidwear,
-		MPN.set_mywear,
-		MPN.set_underwear,
+		Mpn.set_maidwear,
+		Mpn.set_mywear,
+		Mpn.set_underwear,
 	}));
 
 	private static readonly Dictionary<DailyMgr.Daily, string> DayTimeLabels = new() {
@@ -116,7 +117,7 @@ internal class CostumeEdit {
 		maid.AllProcPropSeqStart();
 		GameMain.instance.StartCoroutine(DressCode.WaitMaidPropBusy(maid, () => {
 			var scriptMgr = GameMain.Instance.ScriptMgr;
-			scriptMgr.adv_kag.kag.LoadScenarioString($"@SceneCall name=SceneEdit label={label} {DressCode.ScriptTag}={profile} {(reopenPanel ? DressCode.ReopenPanelTag : string.Empty)}");
+			scriptMgr.adv_kag.kag.LoadScenarioString($"@SceneCall name=SceneEdit label={label} {DressCode.ScriptTag}={profile} facility_costume {(reopenPanel ? DressCode.ReopenPanelTag : string.Empty)}");
 			scriptMgr.adv_kag.kag.Exec();
 		}));
 	}
@@ -359,9 +360,7 @@ internal class CostumeEdit {
 	}
 
 	// load only relevant slots from presets and as temporary props
-	[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
-	[HarmonyPrefix]
-	private static bool CharacterMgr_PresetSet(ref List<MaidProp> __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) {
+	private static bool PresetSet(ref List<MaidProp> __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) {
 		if (!_isDressCode) return true;
 
 		__state = f_prest.listMprop;
@@ -374,7 +373,7 @@ internal class CostumeEdit {
 				fileName = deleteItem;
 			}
 			if (__instance.IsEnableMenu(fileName)) {
-				if (mpn != MPN.body) {
+				if (mpn != Mpn.body) {
 					f_maid.SetProp(mpn, fileName, maidProp.nFileNameRID, true);
 				}
 			} else {
@@ -383,8 +382,8 @@ internal class CostumeEdit {
 		}
 
 		if (Product.isPublic) {
-			f_maid.SetProp(MPN.bra, "bra030_i_.menu", 0, true);
-			f_maid.SetProp(MPN.panz, "Pants030_i_.menu", 0, true);
+			f_maid.SetProp(Mpn.bra, "bra030_i_.menu", 0, true);
+			f_maid.SetProp(Mpn.panz, "Pants030_i_.menu", 0, true);
 		}
 
 		f_maid.AllProcPropSeqStart();
@@ -392,11 +391,51 @@ internal class CostumeEdit {
 		return false;
 	}
 
-	[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
-	[HarmonyPostfix]
-	private static void CharacterMgr_PostPresetSet(List<MaidProp> __state, CharacterMgr.Preset f_prest) {
+	private static void PostPresetSet(List<MaidProp> __state, CharacterMgr.Preset f_prest) {
 		if (!_isDressCode) return;
 		f_prest.listMprop = __state;
+	}
+
+	internal class PatchMethods30 {
+		[HarmonyPrefix]
+		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset), typeof(bool))]
+		private static bool CharacterMgr_PresetSet(ref List<MaidProp> __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) => PresetSet(ref __state, __instance, f_maid, f_prest);
+
+		[HarmonyPostfix]
+		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset), typeof(bool))]
+		private static void CharacterMgr_PostPresetSet(List<MaidProp> __state, CharacterMgr.Preset f_prest) => PostPresetSet(__state, f_prest);
+
+		private static void Category_SetEnabled(SceneEdit.SCategory category) {
+			if (!_isDressCode) {
+				category.m_isEnabled = true;
+			}
+		}
+
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(SceneEdit), nameof(SceneEdit.UpdatePanel_Category))]
+		private static IEnumerable<CodeInstruction> UpdatePanel_Category(IEnumerable<CodeInstruction> instructions) {
+			var codeMatcher = new CodeMatcher(instructions);
+
+			codeMatcher
+				.MatchStartForward(
+					new CodeMatch(OpCodes.Ldc_I4_1),
+					new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(SceneEdit.SCategory), nameof(SceneEdit.SCategory.m_isEnabled)))
+				)
+				.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(PatchMethods30), nameof(Category_SetEnabled)))
+				.SetOpcodeAndAdvance(OpCodes.Nop);
+
+			return codeMatcher.InstructionEnumeration();
+		}
+	}
+
+	internal class PatchMethods20 {
+		[HarmonyPrefix]
+		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
+		private static bool CharacterMgr_PresetSet(ref List<MaidProp> __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) => PresetSet(ref __state, __instance, f_maid, f_prest);
+
+		[HarmonyPostfix]
+		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
+		private static void CharacterMgr_PostPresetSet(List<MaidProp> __state, CharacterMgr.Preset f_prest) => PostPresetSet(__state, f_prest);
 	}
 
 	// save the temporary instead of the permanent items in the preset
@@ -431,9 +470,9 @@ internal class CostumeEdit {
 			SetButtonTexture(__instance, maid, button.m_menuCategory, button.m_mpn, button.m_txtItem);
 			var costumeItemIsEnabled = !_enabledMpn.TryGetValue(button.m_mpn, out var isEnabled) || isEnabled;
 			__instance.SetButtonActive(button, costumeItemIsEnabled);
-			if (button.m_mpn == MPN.hairt) {
+			if (button.m_mpn == Mpn.hairt) {
 				var component = UTY.GetChildObject(button.m_btnButton.gameObject, "Item2", false).GetComponent<UITexture>();
-				SetButtonTexture(__instance, maid, SceneEditInfo.EMenuCategory.アクセサリ, MPN.acckamisub, component);
+				SetButtonTexture(__instance, maid, SceneEditInfo.EMenuCategory.アクセサリ, Mpn.acckamisub, component);
 			}
 		}
 
@@ -460,10 +499,10 @@ internal class CostumeEdit {
 		if (!_isDressCode) return true;
 
 		SetCostumeItemEnabled(itemData.m_mpn, active);
-		if (itemData.m_mpn == MPN.hairt) {
-			__instance.testForced[MPN.acckamisub] = active;
+		if (itemData.m_mpn == Mpn.hairt) {
+			__instance.testForced[Mpn.acckamisub] = active;
 		}
-		SetCostumeItemEnabled(MPN.acckamisub, active);
+		SetCostumeItemEnabled(Mpn.acckamisub, active);
 		itemData.m_bBtnActive = active;
 		if (itemData.m_bBtnActive) {
 			itemData.m_btnButton.defaultColor = __instance.activeColor;

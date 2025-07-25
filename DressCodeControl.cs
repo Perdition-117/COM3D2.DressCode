@@ -79,7 +79,7 @@ internal class DressCodeControl : MonoBehaviour {
 				dailyManager.m_goPanel.SetActive(true);
 
 				var privateMaid = PrivateModeMgr.Instance.PrivateMaid;
-				if (privateMaid != null) {
+				if (privateMaid != null && !privateMaid.IsCrcBody) {
 					privateMaid.Visible = true;
 
 					// update private maid costume if necessary

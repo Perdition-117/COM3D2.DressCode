@@ -59,7 +59,16 @@ internal class ProfilePanel : CanvasComponent {
 
 		_toggleGroup = new(_buttonGroup);
 		_toggleGroup.ValueChanged += (o, e) => {
-			_toggleGroup[e.Value].EditIsEnabled = e.IsSelected;
+			var maid = e.Value switch {
+				CostumeProfile.Scene => DressCode.GetHeadMaid(),
+				CostumeProfile.Personal => _parentControl.SelectedMaid,
+				_ => null,
+			};
+			if (maid is { IsCrcBody: true }) {
+				_toggleGroup[e.Value].EditIsEnabled = false;
+			} else {
+				_toggleGroup[e.Value].EditIsEnabled = e.IsSelected;
+			}
 			if (e.IsSelected) {
 				_selectedProfile = e.Value;
 				if (!_noEventTrigger) {

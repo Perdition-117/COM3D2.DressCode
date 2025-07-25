@@ -20,6 +20,8 @@ public partial class DressCode : BaseUnityPlugin {
 	internal const string ScriptTag = "dresscode";
 	internal const string ReopenPanelTag = "dresscodereopen";
 
+	internal static readonly Version GameVersion = new(GameUty.GetBuildVersionText());
+
 	private static ManualLogSource _logger;
 	private static Configuration _config;
 
@@ -54,6 +56,7 @@ public partial class DressCode : BaseUnityPlugin {
 		Harmony.CreateAndPatchAll(typeof(DressCode));
 		Harmony.CreateAndPatchAll(typeof(CostumeEdit));
 		Harmony.CreateAndPatchAll(typeof(CharacterSelectThumbnail));
+		Harmony.CreateAndPatchAll(GameVersion.Major >= 3 ? typeof(CostumeEdit.PatchMethods30) : typeof(CostumeEdit.PatchMethods20));
 	}
 
 	internal static void LogDebug(object data) {
@@ -323,7 +326,7 @@ public partial class DressCode : BaseUnityPlugin {
 		// reload private mode costume between private mode events
 		if (_activeCostumeScene == CostumeScene.PrivateMode && nextSceneName == SceneName.PrivateModeEvent) {
 			var maid = PrivateModeMgr.Instance.PrivateMaid;
-			if (TryGetEffectiveCostume(maid, CostumeScene.PrivateMode, out var costume)) {
+			if (!maid.IsCrcBody && TryGetEffectiveCostume(maid, CostumeScene.PrivateMode, out var costume)) {
 				LogDebug("Reloading private mode costume...");
 				_isReloadingCostume = true;
 				LoadCostume(maid, costume, false, true);
@@ -338,9 +341,12 @@ public partial class DressCode : BaseUnityPlugin {
 		}
 
 		if (_activeCostumeScene == CostumeScene.Honeymoon) {
+			var maid = HoneymoonManager.Instance.targetMaid;
+
+			if (maid.IsCrcBody) return;
+
 			// reload honeymoon costume between honeymoon events
 			if (nextSceneName == SceneName.Honeymoon) {
-				var maid = HoneymoonManager.Instance.targetMaid;
 				if (TryGetEffectiveCostume(maid, CostumeScene.Honeymoon, out var costume)) {
 					LogDebug("Reloading honeymoon costume...");
 					if (_temporaryCostume.ContainsKey(maid.status.guid)) {
@@ -359,7 +365,6 @@ public partial class DressCode : BaseUnityPlugin {
 			// set permanent honeymoon costume for honeymoon yotogi
 			if (nextCostumeScene == CostumeScene.Yotogi) {
 				LogDebug("Honeymoon yotogi started.");
-				var maid = HoneymoonManager.Instance.targetMaid;
 				if (HasEffectiveCostume(maid, CostumeScene.Honeymoon)) {
 					RemoveTemporaryCostume(maid);
 					SetCostume(maid, CostumeScene.Honeymoon);
@@ -370,7 +375,6 @@ public partial class DressCode : BaseUnityPlugin {
 			// restore permanent costume after honeymoon yotogi
 			if (GetCostumeScene(prevSceneName) == CostumeScene.Yotogi) {
 				LogDebug("Honeymoon yotogi ended.");
-				var maid = HoneymoonManager.Instance.targetMaid;
 				if (_originalCostume.ContainsKey(maid.status.guid)) {
 					RestoreCostume(maid);
 				}
@@ -391,7 +395,7 @@ public partial class DressCode : BaseUnityPlugin {
 
 		// reset costumes if no scene is active
 		if (_activeCostumeScene == CostumeScene.None) {
-			foreach (var maid in GetMaids().Where(e => e.body0)) {
+			foreach (var maid in GetMaids().Where(e => e.body0 && !e.IsCrcBody)) {
 				ResetCostume(maid);
 			}
 			_originalCostume.Clear();
@@ -406,7 +410,7 @@ public partial class DressCode : BaseUnityPlugin {
 		}
 
 		if (nextCostumeScene != CostumeScene.None) {
-			foreach (var maid in GetMaids().Where(e => e.body0)) {
+			foreach (var maid in GetMaids().Where(e => e.body0 && !e.IsCrcBody)) {
 				// allow honeymoon costume to load properly on startup
 				if (nextCostumeScene == CostumeScene.Honeymoon) {
 					maid.Visible = true;
@@ -423,7 +427,7 @@ public partial class DressCode : BaseUnityPlugin {
 			return;
 		}
 		var maid = __instance.m_gcActiveMaid[f_nActiveSlotNo];
-		if (maid != null) {
+		if (maid != null && !maid.IsCrcBody) {
 			ResetCostume(maid);
 		}
 	}
@@ -432,7 +436,7 @@ public partial class DressCode : BaseUnityPlugin {
 	[HarmonyPatch(typeof(CharacterSelectMain), nameof(CharacterSelectMain.OnFinish))]
 	[HarmonyPostfix]
 	private static void CharacterSelectMain_OnFinish(CharacterSelectMain __instance) {
-		if (__instance.select_maid_ == null) {
+		if (__instance.select_maid_ == null || __instance.select_maid_.IsCrcBody) {
 			return;
 		}
 
@@ -465,7 +469,7 @@ public partial class DressCode : BaseUnityPlugin {
 
 		// secondary yotogi maids are not yet loaded on sceneLoaded, so we fix them here
 		foreach (var maid in __instance.loaded_check_maid_) {
-			if (maid != null) {
+			if (maid != null && !maid.IsCrcBody) {
 				SetCostume(maid, CostumeScene.Yotogi);
 			}
 		}
@@ -474,7 +478,7 @@ public partial class DressCode : BaseUnityPlugin {
 	[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.SetActiveMaid))]
 	[HarmonyPostfix]
 	private static void CharacterMgr_SetActiveMaid(Maid f_maid) {
-		if (_isLoadingPrivateModeMaid && !_temporaryCostume.ContainsKey(f_maid.status.guid)) {
+		if (!f_maid.IsCrcBody && _isLoadingPrivateModeMaid && !_temporaryCostume.ContainsKey(f_maid.status.guid)) {
 			foreach (var mpn in CostumeEdit.CostumeMpn) {
 				var prop = f_maid.GetProp(mpn);
 				f_maid.ResetProp(prop);
@@ -488,7 +492,7 @@ public partial class DressCode : BaseUnityPlugin {
 	[HarmonyPatch(typeof(Maid), nameof(Maid.ResetProp), typeof(MaidProp), typeof(bool))]
 	[HarmonyPrefix]
 	private static bool Maid_ResetProp(Maid __instance, MaidProp mp) {
-		if ((_activeCostumeScene == CostumeScene.PrivateMode || _activeCostumeScene == CostumeScene.Honeymoon) && !_isReloadingCostume && _temporaryCostume.TryGetValue(__instance.status.guid, out var costume)) {
+		if (!__instance.IsCrcBody && (_activeCostumeScene == CostumeScene.PrivateMode || _activeCostumeScene == CostumeScene.Honeymoon) && !_isReloadingCostume && _temporaryCostume.TryGetValue(__instance.status.guid, out var costume)) {
 			var mpn = (MPN)mp.idx;
 			var hasItem = costume.TryGetItem(mpn, out var item) && item.FileName != string.Empty;
 			if (hasItem) {
