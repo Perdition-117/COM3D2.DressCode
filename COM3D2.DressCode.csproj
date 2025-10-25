@@ -18,7 +18,7 @@
   <ItemGroup>
     <PackageReference Include="BepInEx.BaseLib" Version="5.4.19" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.1.0" />
-    <PackageReference Include="COM3D2.GameLibs" Version="2.25.2-r.0" />
+    <PackageReference Include="COM3D2.GameLibs" Version="2.44.1-r.0" />
     <PackageReference Include="HarmonyX" Version="2.10.0" />
     <PackageReference Include="UnityEngine" Version="5.6.1" />
   </ItemGroup>

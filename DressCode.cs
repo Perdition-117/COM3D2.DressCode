@@ -7,6 +7,7 @@ using COM3D2.I2PluginLocalization;
 using HarmonyLib;
 using Honeymoon;
 using I2.Loc;
+using MaidCafe;
 using PrivateMaidMode;
 using UnityEngine.SceneManagement;
 
@@ -314,6 +315,8 @@ public partial class DressCode : BaseUnityPlugin {
 	}
 
 	private static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+		if (MaidCafeManager.isMaidCafeMode) return;
+
 		var prevSceneName = _currentSceneName;
 		var nextSceneName = scene.name;
 		_currentSceneName = nextSceneName;
