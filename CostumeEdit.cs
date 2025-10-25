@@ -360,10 +360,15 @@ internal class CostumeEdit {
 	}
 
 	// load only relevant slots from presets and as temporary props
-	private static bool PresetSet(ref List<MaidProp> __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) {
+	private static bool PresetSet(ref CharacterMgr.Preset __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) {
 		if (!_isDressCode) return true;
 
-		__state = f_prest.listMprop;
+		__state = new() {
+			strFileName = f_prest.strFileName,
+			listMprop = f_prest.listMprop,
+		};
+		// emptying the file name prevents loading ExternalPreset data
+		f_prest.strFileName = "";
 		f_prest.listMprop = f_prest.listMprop.Where(e => CostumeMpn.Contains((MPN)e.idx)).ToList();
 
 		foreach (var maidProp in f_prest.listMprop) {
@@ -391,19 +396,22 @@ internal class CostumeEdit {
 		return false;
 	}
 
-	private static void PostPresetSet(List<MaidProp> __state, CharacterMgr.Preset f_prest) {
+	private static void PostPresetSet(CharacterMgr.Preset __state, CharacterMgr.Preset f_prest) {
 		if (!_isDressCode) return;
-		f_prest.listMprop = __state;
+		if (!string.IsNullOrEmpty(__state.strFileName)) {
+			f_prest.strFileName = __state.strFileName;
+		}
+		f_prest.listMprop = __state.listMprop;
 	}
 
 	internal class PatchMethods30 {
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset), typeof(bool))]
-		private static bool CharacterMgr_PresetSet(ref List<MaidProp> __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) => PresetSet(ref __state, __instance, f_maid, f_prest);
+		private static bool CharacterMgr_PresetSet(ref CharacterMgr.Preset __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) => PresetSet(ref __state, __instance, f_maid, f_prest);
 
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset), typeof(bool))]
-		private static void CharacterMgr_PostPresetSet(List<MaidProp> __state, CharacterMgr.Preset f_prest) => PostPresetSet(__state, f_prest);
+		private static void CharacterMgr_PostPresetSet(CharacterMgr.Preset __state, CharacterMgr.Preset f_prest) => PostPresetSet(__state, f_prest);
 
 		private static void Category_SetEnabled(SceneEdit.SCategory category) {
 			if (!_isDressCode) {
@@ -431,11 +439,11 @@ internal class CostumeEdit {
 	internal class PatchMethods20 {
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
-		private static bool CharacterMgr_PresetSet(ref List<MaidProp> __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) => PresetSet(ref __state, __instance, f_maid, f_prest);
+		private static bool CharacterMgr_PresetSet(ref CharacterMgr.Preset __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) => PresetSet(ref __state, __instance, f_maid, f_prest);
 
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
-		private static void CharacterMgr_PostPresetSet(List<MaidProp> __state, CharacterMgr.Preset f_prest) => PostPresetSet(__state, f_prest);
+		private static void CharacterMgr_PostPresetSet(CharacterMgr.Preset __state, CharacterMgr.Preset f_prest) => PostPresetSet(__state, f_prest);
 	}
 
 	// save the temporary instead of the permanent items in the preset
