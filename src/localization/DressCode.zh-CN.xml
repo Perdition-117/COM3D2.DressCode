@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Localization>
+	<Term Key="CostumeSetting" Translation="制服设定" />
+		
+	<Term Key="DefaultLabel" Translation="默认" />
+</Localization>

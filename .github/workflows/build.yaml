@@ -37,10 +37,11 @@ jobs:
         Add-Content -Value "ARCHIVE_NAME=$archiveName" -Path $env:GITHUB_ENV
         $basePath = Get-Location
         Set-Location src\build
-        New-Item -Type Directory config, plugins
-        Move-Item localization config
-        Move-Item DressCode.dll, COM3D2.I2PluginLocalization.dll plugins
-        Compress-Archive -Path config, plugins -DestinationPath $basePath\$archiveName -CompressionLevel NoCompression
+        $pluginDirectory = "plugins\DressCode"
+        New-Item -Type Directory $pluginDirectory
+        Move-Item DressCode.dll,localization $pluginDirectory
+        Move-Item I2PluginLocalization.dll plugins
+        Compress-Archive -Path plugins -DestinationPath $basePath\$archiveName -CompressionLevel NoCompression
 
     - name: Release
       uses: softprops/action-gh-release@v1

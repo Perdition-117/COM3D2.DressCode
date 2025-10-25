@@ -26,13 +26,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="COM3D2.I2PluginLocalization">
-      <HintPath>..\Libs\COM3D2.I2PluginLocalization.dll</HintPath>
+    <Reference Include="I2PluginLocalization">
+      <HintPath>..\lib\I2PluginLocalization.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="localization\DressCode.xml">
+    <None Update="localization\*.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

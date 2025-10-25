@@ -3,7 +3,7 @@ using System.IO;
 using BepInEx;
 using BepInEx.Logging;
 using com.workman.cm3d2.scene.dailyEtc;
-using COM3D2.I2PluginLocalization;
+using I2PluginLocalization;
 using HarmonyLib;
 using Honeymoon;
 using I2.Loc;
@@ -21,12 +21,13 @@ public partial class DressCode : BaseUnityPlugin {
 	internal const string ScriptTag = "dresscode";
 	internal const string ReopenPanelTag = "dresscodereopen";
 
+	private static readonly string PluginPath = Path.Combine(Paths.PluginPath, "DressCode");
 	internal static readonly Version GameVersion = new(GameUty.GetBuildVersionText());
 
 	private static ManualLogSource _logger;
 	private static Configuration _config;
 
-	private static readonly PluginLocalization _localization = new(PluginInfo.PLUGIN_NAME);
+	private static readonly PluginLocalization _localization = PluginLocalization.Load(Path.Combine(PluginPath, "localization"), PluginInfo.PLUGIN_NAME);
 	private static readonly Dictionary<string, List<MaidProp>> _originalCostume = new();
 	private static readonly Dictionary<string, Configuration.Costume> _temporaryCostume = new();
 	private static string _currentSceneName = string.Empty;

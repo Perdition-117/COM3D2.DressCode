@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Localization>
+	<Term Key="SceneSetting" Translation="シーン" />
+	<Term Key="MaidSetting" Translation="メイド" />
+
+	<Term Key="SceneDance" Translation="ダンス" />
+	<Term Key="ScenePoleDance" Translation="ポールダンス" />
+	<Term Key="SceneYotogi" Translation="夜伽" />
+	<Term Key="SceneYotogiTalk" Translation="夜伽（会話する）" />
+	<Term Key="ScenePrivateMode" Translation="プライベートモード" />
+	<Term Key="SceneHoneymoon" Translation="ハネムーン" />
+	<Term Key="SceneNightPool" Translation="ナイトプール" />
+		
+	<Term Key="CostumeSetting" Translation="コスチューム設定" />
+		
+	<Term Key="DefaultLabel" Translation="デフォルト" />
+		
+	<Term Key="EditButton" Translation="エディット" />
+</Localization>
