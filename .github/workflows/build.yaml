@@ -6,45 +6,39 @@ on:
       - '**'
 
 env:
-  DOTNET_VERSION: '6.0.x' # The .NET SDK version to use
+  DOTNET_VERSION: '6.0.x' # .NET SDK version
   DOTNET_CLI_TELEMETRY_OPTOUT: false
-  OUTPUT_NAME: COM3D2.DressCode
+  ARCHIVE_PATH: ${{ github.workspace }}\${{ github.event.repository.name }}-${{ github.ref_name }}.zip
 
 jobs:
   build:
+    runs-on: windows-2022
 
-    runs-on: windows-2019
+    permissions:
+      contents: write
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v5
 
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        dotnet-quality: ga
+      - name: Install dependencies
+        run: dotnet restore
 
-    - name: Install dependencies
-      run: dotnet restore
-      
-    - name: Build
-      run: dotnet build --configuration Release --no-restore --output build
-      
-    - name: Create the package
-      run: |
-        $archiveName = "$env:OUTPUT_NAME-$env:GITHUB_REF_NAME.zip"
-        Add-Content -Value "ARCHIVE_NAME=$archiveName" -Path $env:GITHUB_ENV
-        $basePath = Get-Location
-        Set-Location src\build
-        $pluginDirectory = "plugins\DressCode"
-        New-Item -Type Directory $pluginDirectory
-        Move-Item DressCode.dll,localization $pluginDirectory
-        Move-Item I2PluginLocalization.dll plugins
-        Compress-Archive -Path plugins -DestinationPath $basePath\$archiveName -CompressionLevel NoCompression
+      - name: Build
+        run: dotnet build --configuration Release --no-restore --property:OutputPath=build
 
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        fail_on_unmatched_files: true
-        files: ${{ env.ARCHIVE_NAME }}
+      - name: Create package
+        run: |
+          $assemblyName = dotnet msbuild -getProperty:AssemblyName src
+          Set-Location src\build
+          $pluginDirectory = "BepInEx\plugins\DressCode"
+          New-Item -Type Directory $pluginDirectory
+          Move-Item "$assemblyName.dll",localization $pluginDirectory
+          Move-Item I2PluginLocalization.dll BepInEx\plugins
+          Compress-Archive -DestinationPath $env:ARCHIVE_PATH -Path BepInEx
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: ${{ env.ARCHIVE_PATH }}
