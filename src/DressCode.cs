@@ -17,6 +17,7 @@ namespace DressCode;
 
 [BepInPlugin("net.perdition.com3d2.dresscode", PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 [BepInDependency("net.perdition.com3d2.editbodyloadfix", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("org.krypto5863.com3d2.choosypreset", BepInDependency.DependencyFlags.SoftDependency)]
 public partial class DressCode : BaseUnityPlugin {
 	internal const string ScriptTag = "dresscode";
 	internal const string ReopenPanelTag = "dresscodereopen";

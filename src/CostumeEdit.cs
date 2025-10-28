@@ -360,16 +360,17 @@ internal class CostumeEdit {
 	}
 
 	// load only relevant slots from presets and as temporary props
-	private static bool PresetSet(ref CharacterMgr.Preset __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) {
+	private static bool PresetSet(ref PresetBackup __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) {
 		if (!_isDressCode) return true;
 
 		__state = new() {
-			strFileName = f_prest.strFileName,
-			listMprop = f_prest.listMprop,
+			OriginalFileName = f_prest.strFileName,
+			OriginalPropList = f_prest.listMprop,
 		};
 		// emptying the file name prevents loading ExternalPreset data
 		f_prest.strFileName = "";
 		f_prest.listMprop = f_prest.listMprop.Where(e => CostumeMpn.Contains((MPN)e.idx)).ToList();
+		__state.ModifiedPropList = f_prest.listMprop;
 
 		foreach (var maidProp in f_prest.listMprop) {
 			var mpn = (MPN)maidProp.idx;
@@ -396,22 +397,27 @@ internal class CostumeEdit {
 		return false;
 	}
 
-	private static void PostPresetSet(CharacterMgr.Preset __state, CharacterMgr.Preset f_prest) {
+	private static void PostPresetSet(PresetBackup __state, CharacterMgr.Preset f_prest) {
 		if (!_isDressCode) return;
-		if (!string.IsNullOrEmpty(__state.strFileName)) {
-			f_prest.strFileName = __state.strFileName;
+
+		if (!string.IsNullOrEmpty(__state.OriginalFileName)) {
+			f_prest.strFileName = __state.OriginalFileName;
 		}
-		f_prest.listMprop = __state.listMprop;
+
+		// if the list is not the one we set in the prefix, an earlier patcher has probably restored it
+		if (f_prest.listMprop == __state.ModifiedPropList) {
+			f_prest.listMprop = __state.OriginalPropList;
+		}
 	}
 
 	internal class PatchMethods30 {
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset), typeof(bool))]
-		private static bool CharacterMgr_PresetSet(ref CharacterMgr.Preset __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) => PresetSet(ref __state, __instance, f_maid, f_prest);
+		private static bool CharacterMgr_PresetSet(ref PresetBackup __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) => PresetSet(ref __state, __instance, f_maid, f_prest);
 
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset), typeof(bool))]
-		private static void CharacterMgr_PostPresetSet(CharacterMgr.Preset __state, CharacterMgr.Preset f_prest) => PostPresetSet(__state, f_prest);
+		private static void CharacterMgr_PostPresetSet(PresetBackup __state, CharacterMgr.Preset f_prest) => PostPresetSet(__state, f_prest);
 
 		private static void Category_SetEnabled(SceneEdit.SCategory category) {
 			if (!_isDressCode) {
@@ -439,11 +445,11 @@ internal class CostumeEdit {
 	internal class PatchMethods20 {
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
-		private static bool CharacterMgr_PresetSet(ref CharacterMgr.Preset __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) => PresetSet(ref __state, __instance, f_maid, f_prest);
+		private static bool CharacterMgr_PresetSet(ref PresetBackup __state, CharacterMgr __instance, Maid f_maid, CharacterMgr.Preset f_prest) => PresetSet(ref __state, __instance, f_maid, f_prest);
 
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet), typeof(Maid), typeof(CharacterMgr.Preset))]
-		private static void CharacterMgr_PostPresetSet(CharacterMgr.Preset __state, CharacterMgr.Preset f_prest) => PostPresetSet(__state, f_prest);
+		private static void CharacterMgr_PostPresetSet(PresetBackup __state, CharacterMgr.Preset f_prest) => PostPresetSet(__state, f_prest);
 	}
 
 	// save the temporary instead of the permanent items in the preset
@@ -523,5 +529,11 @@ internal class CostumeEdit {
 
 	private static void SetCostumeItemEnabled(MPN mpn, bool isEnabled) {
 		_enabledMpn[mpn] = isEnabled;
+	}
+
+	private class PresetBackup {
+		public string OriginalFileName { get; internal set; }
+		public List<MaidProp> OriginalPropList { get; internal set; }
+		public List<MaidProp> ModifiedPropList { get; internal set; }
 	}
 }
