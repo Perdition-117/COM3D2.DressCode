@@ -416,10 +416,23 @@ public partial class DressCode : BaseUnityPlugin {
 
 		if (nextCostumeScene != CostumeScene.None) {
 			foreach (var maid in GetMaids().Where(e => e.body0 && !e.IsCrcBody)) {
+				// load outfits for clones appearing on dance stage screen
+				if (nextCostumeScene == CostumeScene.Dance) {
+					var danceMain = RhythmAction_Mgr.Instance.m_DanceMain;
+					var maidCopies = danceMain.m_PresetCopyToDummyChara;
+					if (maid.ActiveSlotNo < maidCopies.Length && GameMain.Instance.CharacterMgr.GetMaid(maidCopies[maid.ActiveSlotNo]) is var sourceMaid) {
+						if (danceMain.m_listTempMaid.Contains(maid) && TryGetEffectiveCostume(sourceMaid, CostumeScene.Dance, out var costume)) {
+							LoadCostume(maid, costume);
+							continue;
+						}
+					}
+				}
+
 				// allow honeymoon costume to load properly on startup
 				if (nextCostumeScene == CostumeScene.Honeymoon) {
 					maid.Visible = true;
 				}
+
 				SetCostume(maid, nextCostumeScene, TemporaryCostumeScenes.Contains(nextCostumeScene));
 			}
 		}
