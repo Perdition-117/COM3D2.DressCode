@@ -1,4 +1,4 @@
-# COM3D2.DressCode
+# DressCode
 
 Automatically switches costume per scene. Currently supports the following scenes:
 
@@ -13,7 +13,7 @@ Automatically switches costume per scene. Currently supports the following scene
 
 ## Installing
 
-Get the latest version from [the release page](../../releases/latest). Extract the archive contents into `BepInEx`.
+Get the latest version from [the release page](../../releases/latest). Extract the archive contents into the root of your game directory.
 
 ## Usage
 
