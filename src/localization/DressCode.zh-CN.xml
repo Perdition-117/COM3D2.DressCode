@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Localization>
-	<Term Key="CostumeSetting" Translation="制服设定" />
+	<Term Key="BackButton" Translation="返回" />
+		
+	<Term Key="SceneSetting" Translation="场景" />
+	<Term Key="MaidSetting" Translation="女仆" />
+		
+	<Term Key="SceneDance" Translation="舞蹈" />
+	<Term Key="ScenePoleDance" Translation="钢管舞" />
+	<Term Key="SceneYotogi" Translation="夜伽" />
+	<Term Key="SceneYotogiTalk" Translation="夜伽(对话)" />
+	<Term Key="ScenePrivateMode" Translation="私人模式" />
+	<Term Key="SceneHoneymoon" Translation="蜜月" />
+	<Term Key="SceneNightPool" Translation="夜晚泳池" />
+		
+	<Term Key="CostumeSetting" Translation="服装设置" />
 		
 	<Term Key="DefaultLabel" Translation="默认" />
+	<Term Key="DefaultDescription" Translation="使用默认服装" />
+	<Term Key="SceneLabel" Translation="场景" />
+	<Term Key="SceneDescription" Translation="使用场景服装" />
+	<Term Key="PersonalLabel" Translation="个人" />
+	<Term Key="PersonalDescription" Translation="使用个人服装" />
+		
+	<Term Key="EditButton" Translation="编辑" />
 </Localization>
