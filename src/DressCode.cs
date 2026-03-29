@@ -304,7 +304,7 @@ public partial class DressCode : BaseUnityPlugin {
 			costumeScene = CostumeScene.PrivateMode;
 		} else if (sceneName == SceneName.Honeymoon) {
 			costumeScene = CostumeScene.Honeymoon;
-		} else if (sceneName == SceneName.NightPool) {
+		} else if (sceneName is SceneName.NightPool or SceneName.NightPoolExtreme) {
 			costumeScene = CostumeScene.NightPool;
 		} else if (sceneName.StartsWith("SceneDance") && DanceMain.SelectDanceData != null) {
 			if (DanceMain.SelectDanceData.bgType == DanceData.BgType.PoleDance) {
