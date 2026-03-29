@@ -3,10 +3,10 @@ using System.IO;
 using BepInEx;
 using BepInEx.Logging;
 using com.workman.cm3d2.scene.dailyEtc;
-using I2PluginLocalization;
 using HarmonyLib;
 using Honeymoon;
 using I2.Loc;
+using I2PluginLocalization;
 using MaidCafe;
 using PrivateMaidMode;
 using UnityEngine.SceneManagement;
@@ -307,10 +307,10 @@ public partial class DressCode : BaseUnityPlugin {
 		} else if (sceneName == SceneName.NightPool) {
 			costumeScene = CostumeScene.NightPool;
 		} else if (sceneName.StartsWith("SceneDance") && DanceMain.SelectDanceData != null) {
-			if (DanceMain.SelectDanceData.RhythmGameCorrespond) {
-				costumeScene = CostumeScene.Dance;
-			} else {
+			if (DanceMain.SelectDanceData.bgType == DanceData.BgType.PoleDance) {
 				costumeScene = CostumeScene.PoleDance;
+			} else {
+				costumeScene = CostumeScene.Dance;
 			}
 		}
 		return costumeScene;

@@ -56,10 +56,10 @@ internal class CharacterSelectThumbnail {
 		}
 
 		if (_scene is CostumeScene.Dance or CostumeScene.PoleDance) {
-			if (DanceSelect.m_SelectedDance.First() is { RhythmGameCorrespond: true }) {
-				_scene = CostumeScene.Dance;
-			} else {
+			if (DanceSelect.m_SelectedDance.First() is { bgType: DanceData.BgType.PoleDance }) {
 				_scene = CostumeScene.PoleDance;
+			} else {
+				_scene = CostumeScene.Dance;
 			}
 		}
 
