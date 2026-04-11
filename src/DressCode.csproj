@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>1.4.0</Version>
+		<Version>1.4.1</Version>
 		<Authors>Perdition</Authors>
 		<PackageProjectUrl>https://github.com/Perdition-117/COM3D2.DressCode</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/Perdition-117/COM3D2.DressCode.git</RepositoryUrl>

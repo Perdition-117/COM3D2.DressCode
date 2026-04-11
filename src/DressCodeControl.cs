@@ -78,8 +78,10 @@ internal class DressCodeControl : MonoBehaviour {
 				var dailyManager = manager.GetManager<DailyMgr>();
 				dailyManager.m_goPanel.SetActive(true);
 
-				var privateMaid = PrivateModeMgr.Instance.PrivateMaid;
-				if (privateMaid != null && !privateMaid.IsCrcBody) {
+				var isPrivateMode = dailyManager.m_api.m_isPrivate;
+
+				if (isPrivateMode) {
+					var privateMaid = PrivateModeMgr.Instance.PrivateMaid;
 					privateMaid.Visible = true;
 
 					// update private maid costume if necessary
@@ -92,7 +94,7 @@ internal class DressCodeControl : MonoBehaviour {
 						}
 					}
 				}
-				manager.ResetBackground();
+				manager.ResetBackground(isPrivateMode);
 				GameMain.Instance.MainCamera.FadeIn();
 			});
 		};

@@ -42,7 +42,7 @@ public class DressCodeManager : BaseCreatePanel {
 		GameMain.Instance.BgMgr.ChangeBg("Theater");
 	}
 
-	internal void ResetBackground() {
+	internal void ResetBackground(bool isPrivateMode) {
 		if (GameMain.Instance.VRMode) {
 			GameMain.Instance.MainCamera.SetTargetPos(new(0f, 1.327261f, -0.1473188f));
 			GameMain.Instance.MainCamera.SetDistance(3.6f);
@@ -53,7 +53,7 @@ public class DressCodeManager : BaseCreatePanel {
 			GameMain.Instance.MainCamera.SetAroundAngle(new(245.5691f, 6.273283f));
 		}
 		//GameMain.Instance.MainCamera.SetTargetOffset(Vector3.zero, false);
-		if (PrivateModeMgr.Instance.PrivateMaid != null) {
+		if (isPrivateMode) {
 			PrivateModeMgr.Instance.SelectBG.Apply(GameMain.Instance.CharacterMgr.status.isDaytime);
 			GameMain.Instance.ScriptMgr.is_motion_blend = false;
 			PrivateModeMgr.Instance.SelectLocation.LoadScript();
